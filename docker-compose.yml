@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  whitelabel-super-backend-api:
+    container_name: whitelabel-super-backend-api
+    image: whitelabel-super-backend-api:0.0.0.1
+    build: .
+    ports:
+      - 2011:2011
+    restart: always
