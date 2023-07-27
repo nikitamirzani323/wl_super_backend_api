@@ -1,11 +1,12 @@
 package configs
 
 const (
-	DB_tbl_counter    string = "tbl_counter"
-	DB_tbl_admin      string = "tbl_admin"
-	DB_tbl_admingroup string = "tbl_admingroup"
-	DB_tbl_mst_domain string = "tbl_mst_domain"
-	DB_tbl_mst_curr   string = "tbl_mst_currency"
+	DB_tbl_counter       string = "tbl_counter"
+	DB_tbl_admin         string = "tbl_admin"
+	DB_tbl_admingroup    string = "tbl_admingroup"
+	DB_tbl_mst_domain    string = "tbl_mst_domain"
+	DB_tbl_mst_curr      string = "tbl_mst_currency"
+	DB_tbl_mst_cate_bank string = "tbl_mst_catebank"
 
 	STATUS_NEW      string = "background:#0dcaf0;font-weight:bold;color:black;"
 	STATUS_RUNNING  string = "background:#FFEB3B;font-weight:bold;color:black;"
