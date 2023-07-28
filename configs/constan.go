@@ -7,6 +7,7 @@ const (
 	DB_tbl_mst_domain    string = "tbl_mst_domain"
 	DB_tbl_mst_curr      string = "tbl_mst_currency"
 	DB_tbl_mst_cate_bank string = "tbl_mst_catebank"
+	DB_tbl_mst_banktype  string = "tbl_mst_banktype"
 
 	STATUS_NEW      string = "background:#0dcaf0;font-weight:bold;color:black;"
 	STATUS_RUNNING  string = "background:#FFEB3B;font-weight:bold;color:black;"
