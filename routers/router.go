@@ -59,6 +59,8 @@ func Init() *fiber.App {
 	app.Post("/api/catebank", middleware.JWTProtected(), controllers.CateBankhome)
 	app.Post("/api/catebanksave", middleware.JWTProtected(), controllers.CateBankSave)
 	app.Post("/api/banktypesave", middleware.JWTProtected(), controllers.BankTypeSave)
+	app.Post("/api/master", middleware.JWTProtected(), controllers.Masterhome)
+	app.Post("/api/mastersave", middleware.JWTProtected(), controllers.MasterSave)
 	app.Post("/api/domain", middleware.JWTProtected(), controllers.Domainhome)
 	app.Post("/api/domainsave", middleware.JWTProtected(), controllers.DomainSave)
 

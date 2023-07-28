@@ -11,6 +11,8 @@ type Model_master struct {
 	Master_email      string      `json:"master_email"`
 	Master_status     string      `json:"master_status"`
 	Master_status_css string      `json:"master_status_css"`
+	Master_credit_in  int         `json:"master_credit_in"`
+	Master_credit_out int         `json:"master_credit_out"`
 	Master_list       interface{} `json:"master_list"`
 	Master_create     string      `json:"master_create"`
 	Master_update     string      `json:"master_update"`
