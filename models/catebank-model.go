@@ -191,7 +191,7 @@ func Save_banktype(admin, idrecord, name, img, status, sData string, idcatebank 
 					idbanktype, idcatebank, nmbanktype, imgbanktype, statusbanktype, 
 					createbanktype, createdatebanktype  
 				) values (
-					$1, $2, $3, $4, $5 
+					$1, $2, $3, $4, $5,  
 					$6, $7
 				)
 			`
@@ -212,7 +212,7 @@ func Save_banktype(admin, idrecord, name, img, status, sData string, idcatebank 
 				UPDATE 
 				` + database_banktype_local + `  
 				SET nmbanktype=$1, imgbanktype=$2, statusbanktype=$3,    
-				updatebanktype=$4, updatebanktype=$5    
+				updatebanktype=$4, updatedatebanktype=$5    
 				WHERE idbanktype=$6   
 			`
 
