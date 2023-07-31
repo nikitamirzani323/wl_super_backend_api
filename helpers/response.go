@@ -19,6 +19,7 @@ type Responsemaster struct {
 	Message  string      `json:"message"`
 	Record   interface{} `json:"record"`
 	Listcurr interface{} `json:"listcurr"`
+	Listbank interface{} `json:"listbank"`
 	Time     string      `json:"time"`
 }
 type ResponseAdmin struct {

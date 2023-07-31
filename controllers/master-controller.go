@@ -21,10 +21,13 @@ func Masterhome(c *fiber.Ctx) error {
 	var arraobj []entities.Model_master
 	var objcurr entities.Model_currshare
 	var arraobjcurr []entities.Model_currshare
+	var objbank entities.Model_bankTypeshare
+	var arraobjbank []entities.Model_bankTypeshare
 	render_page := time.Now()
 	resultredis, flag := helpers.GetRedis(Fieldmaster_home_redis)
 	jsonredis := []byte(resultredis)
 	listcurr_RD, _, _, _ := jsonparser.Get(jsonredis, "listcurr")
+	listbank_RD, _, _, _ := jsonparser.Get(jsonredis, "listbank")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		master_id, _ := jsonparser.GetString(value, "master_id")
@@ -64,7 +67,12 @@ func Masterhome(c *fiber.Ctx) error {
 		objcurr.Curr_id = curr_id
 		arraobjcurr = append(arraobjcurr, objcurr)
 	})
+	jsonparser.ArrayEach(listbank_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		banktype_id, _ := jsonparser.GetString(value, "banktype_id")
 
+		objbank.Banktype_id = banktype_id
+		arraobjbank = append(arraobjbank, objbank)
+	})
 	if !flag {
 		result, err := models.Fetch_masterHome()
 		if err != nil {
@@ -85,6 +93,7 @@ func Masterhome(c *fiber.Ctx) error {
 			"message":  "Success",
 			"record":   arraobj,
 			"listcurr": arraobjcurr,
+			"listbank": arraobjbank,
 			"time":     time.Since(render_page).String(),
 		})
 	}

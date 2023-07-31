@@ -20,6 +20,8 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 	var arraobj []entities.Model_master
 	var objcurr entities.Model_currshare
 	var arraobjcurr []entities.Model_currshare
+	var objbank entities.Model_bankTypeshare
+	var arraobjbank []entities.Model_bankTypeshare
 	var res helpers.Responsemaster
 	msg := "Data Not Found"
 	con := db.CreateCon()
@@ -104,10 +106,33 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 	}
 	defer rowcurr.Close()
 
+	sql_selectbank := `SELECT 
+			idbanktype  
+			FROM ` + configs.DB_tbl_mst_banktype + ` 
+			ORDER BY idbanktype ASC    
+	`
+	rowbank, errbank := con.QueryContext(ctx, sql_selectbank)
+	helpers.ErrorCheck(errbank)
+	for rowbank.Next() {
+		var (
+			idbanktype_db string
+		)
+
+		errbank = rowbank.Scan(&idbanktype_db)
+
+		helpers.ErrorCheck(errbank)
+
+		objbank.Banktype_id = idbanktype_db
+		arraobjbank = append(arraobjbank, objbank)
+		msg = "Success"
+	}
+	defer rowbank.Close()
+
 	res.Status = fiber.StatusOK
 	res.Message = msg
 	res.Record = arraobj
 	res.Listcurr = arraobjcurr
+	res.Listbank = arraobjbank
 	res.Time = time.Since(start).String()
 
 	return res, nil
