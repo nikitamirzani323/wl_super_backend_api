@@ -18,9 +18,19 @@ type Model_master struct {
 	Master_status_css string      `json:"master_status_css"`
 	Master_credit_in  int         `json:"master_credit_in"`
 	Master_credit_out int         `json:"master_credit_out"`
-	Master_list       interface{} `json:"master_list"`
+	Master_listadmin  interface{} `json:"master_listadmin"`
 	Master_create     string      `json:"master_create"`
 	Master_update     string      `json:"master_update"`
+}
+type Model_masteradmin struct {
+	Masteradmin_id         int    `json:"masteradmin_id"`
+	Masteradmin_tipe       string `json:"masteradmin_tipe"`
+	Masteradmin_username   string `json:"masteradmin_username"`
+	Masteradmin_name       string `json:"masteradmin_name"`
+	Masteradmin_status     string `json:"masteradmin_status"`
+	Masteradmin_status_css string `json:"masteradmin_status_css"`
+	Masteradmin_create     string `json:"masteradmin_create"`
+	Masteradmin_update     string `json:"masteradmin_update"`
 }
 
 type Controller_mastersave struct {

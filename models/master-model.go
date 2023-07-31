@@ -68,6 +68,51 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 			status_css = configs.STATUS_COMPLETE
 		}
 
+		//MASTER ADMIN
+		var objmasteradmin entities.Model_masteradmin
+		var arraobjmasteradmin []entities.Model_masteradmin
+		sql_selectmasteradmin := `SELECT 
+			idmasteradmin, tipe_masteradmin, username_masteradmin, name_masteradmin, statusmasteradmin,  
+			createmasteradmin, to_char(COALESCE(createdatemasteradmin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
+			updatemasteradmin, to_char(COALESCE(updatedatemasteradmin,now()), 'YYYY-MM-DD HH24:MI:SS') 
+			FROM ` + configs.DB_tbl_mst_master_admin + ` 
+			WHERE idmaster = $1   
+		`
+		row_banktype, err := con.QueryContext(ctx, sql_selectmasteradmin, idmaster_db)
+		helpers.ErrorCheck(err)
+		for row_banktype.Next() {
+			var (
+				idmasteradmin_db                                                                               int
+				tipe_masteradmin_db, username_masteradmin_db, name_masteradmin_db, statusmasteradmin_db        string
+				createmasteradmin_db, createdatemasteradmin_db, updatemasteradmin_db, updatedatemasteradmin_db string
+			)
+			err = row_banktype.Scan(&idmasteradmin_db, &tipe_masteradmin_db, &username_masteradmin_db, &name_masteradmin_db, &statusmasteradmin_db,
+				&createmasteradmin_db, &createdatemasteradmin_db, &updatemasteradmin_db, &updatedatemasteradmin_db)
+
+			create_admin := ""
+			update_admin := ""
+			status_css_admin := configs.STATUS_CANCEL
+			if createmasteradmin_db != "" {
+				create_admin = createmasteradmin_db + ", " + createdatemasteradmin_db
+			}
+			if updatemasteradmin_db != "" {
+				update_admin = updatemasteradmin_db + ", " + updatedatemasteradmin_db
+			}
+			if statusmasteradmin_db == "Y" {
+				status_css_admin = configs.STATUS_COMPLETE
+			}
+
+			objmasteradmin.Masteradmin_id = idmasteradmin_db
+			objmasteradmin.Masteradmin_tipe = tipe_masteradmin_db
+			objmasteradmin.Masteradmin_username = username_masteradmin_db
+			objmasteradmin.Masteradmin_name = name_masteradmin_db
+			objmasteradmin.Masteradmin_status = statusmasteradmin_db
+			objmasteradmin.Masteradmin_status_css = status_css_admin
+			objmasteradmin.Masteradmin_create = create_admin
+			objmasteradmin.Masteradmin_update = update_admin
+			arraobjmasteradmin = append(arraobjmasteradmin, objmasteradmin)
+		}
+
 		obj.Master_id = idmaster_db
 		obj.Master_start = startjoinmaster_db
 		obj.Master_end = endjoinmaster_db
@@ -83,6 +128,7 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 		obj.Master_bank_norek = norekbank_db
 		obj.Master_status = statusmaster_db
 		obj.Master_status_css = status_css
+		obj.Master_listadmin = arraobjmasteradmin
 		obj.Master_create = create
 		obj.Master_update = update
 		arraobj = append(arraobj, obj)

@@ -48,6 +48,30 @@ func Masterhome(c *fiber.Ctx) error {
 		master_create, _ := jsonparser.GetString(value, "master_create")
 		master_update, _ := jsonparser.GetString(value, "master_update")
 
+		var objmasteradmin entities.Model_masteradmin
+		var arraobjmasteradmin []entities.Model_masteradmin
+		record_listadmin_RD, _, _, _ := jsonparser.Get(value, "master_listadmin")
+		jsonparser.ArrayEach(record_listadmin_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			masteradmin_id, _ := jsonparser.GetInt(value, "masteradmin_id")
+			masteradmin_tipe, _ := jsonparser.GetString(value, "masteradmin_tipe")
+			masteradmin_username, _ := jsonparser.GetString(value, "masteradmin_username")
+			masteradmin_name, _ := jsonparser.GetString(value, "masteradmin_name")
+			masteradmin_status, _ := jsonparser.GetString(value, "masteradmin_status")
+			masteradmin_status_css, _ := jsonparser.GetString(value, "masteradmin_status_css")
+			masteradmin_create, _ := jsonparser.GetString(value, "masteradmin_create")
+			masteradmin_update, _ := jsonparser.GetString(value, "masteradmin_update")
+
+			objmasteradmin.Masteradmin_id = int(masteradmin_id)
+			objmasteradmin.Masteradmin_tipe = masteradmin_tipe
+			objmasteradmin.Masteradmin_username = masteradmin_username
+			objmasteradmin.Masteradmin_name = masteradmin_name
+			objmasteradmin.Masteradmin_status = masteradmin_status
+			objmasteradmin.Masteradmin_status_css = masteradmin_status_css
+			objmasteradmin.Masteradmin_create = masteradmin_create
+			objmasteradmin.Masteradmin_update = masteradmin_update
+			arraobjmasteradmin = append(arraobjmasteradmin, objmasteradmin)
+		})
+
 		obj.Master_id = master_id
 		obj.Master_start = master_start
 		obj.Master_end = master_end
@@ -61,6 +85,7 @@ func Masterhome(c *fiber.Ctx) error {
 		obj.Master_bank_id = master_bank_id
 		obj.Master_bank_name = master_bank_name
 		obj.Master_bank_norek = master_bank_norek
+		obj.Master_listadmin = arraobjmasteradmin
 		obj.Master_status = master_status
 		obj.Master_status_css = master_status_css
 		obj.Master_create = master_create
