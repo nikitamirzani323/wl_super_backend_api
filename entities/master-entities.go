@@ -7,8 +7,10 @@ type Model_master struct {
 	Master_idcurr     string      `json:"master_idcurr"`
 	Master_name       string      `json:"master_name"`
 	Master_owner      string      `json:"master_owner"`
-	Master_phone      string      `json:"master_phone"`
+	Master_phone1     string      `json:"master_phone1"`
+	Master_phone2     string      `json:"master_phone2"`
 	Master_email      string      `json:"master_email"`
+	Master_note       string      `json:"master_note"`
 	Master_status     string      `json:"master_status"`
 	Master_status_css string      `json:"master_status_css"`
 	Master_credit_in  int         `json:"master_credit_in"`
@@ -25,7 +27,9 @@ type Controller_mastersave struct {
 	Master_idcurr string `json:"master_idcurr" validate:"required"`
 	Master_name   string `json:"master_name" validate:"required"`
 	Master_owner  string `json:"master_owner"`
-	Master_phone  string `json:"master_phone"`
+	Master_phone1 string `json:"master_phone1"`
+	Master_phone2 string `json:"master_phone2"`
 	Master_email  string `json:"master_email"`
+	Master_note   string `json:"master_note"`
 	Master_status string `json:"master_status" validate:"required"`
 }

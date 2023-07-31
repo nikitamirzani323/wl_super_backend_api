@@ -6,6 +6,9 @@ type Model_curr struct {
 	Curr_create string `json:"curr_create"`
 	Curr_update string `json:"curr_update"`
 }
+type Model_currshare struct {
+	Curr_id string `json:"curr_id"`
+}
 
 type Controller_currsave struct {
 	Page      string `json:"page" validate:"required"`
