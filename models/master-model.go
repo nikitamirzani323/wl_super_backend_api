@@ -33,6 +33,7 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 			to_char(COALESCE(startjoinmaster,now()), 'YYYY-MM-DD HH24:MI:SS'),
 			to_char(COALESCE(endjoinmaster,now()), 'YYYY-MM-DD HH24:MI:SS'),
 			idcurr , nmmaster, nmowner, phone1owner, phone2owner, emailowner, notemaster, statusmaster, 
+			idbanktype , norekbank, nmownerbank, 
 			createmaster, to_char(COALESCE(createdatemaster,now()), 'YYYY-MM-DD HH24:MI:SS'), 
 			updatemaster, to_char(COALESCE(updatedatemaster,now()), 'YYYY-MM-DD HH24:MI:SS') 
 			FROM ` + database_master_local + `  
@@ -43,12 +44,14 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 	for row.Next() {
 		var (
 			idmaster_db, idcurr_db, nmmaster_db, nmowner_db, phone1owner_db, phone2owner_db, emailowner_db, notemaster_db, statusmaster_db string
+			idbanktype_db, norekbank_db, nmownerbank_db                                                                                    string
 			startjoinmaster_db, endjoinmaster_db                                                                                           string
 			createmaster_db, createdatemaster_db, updatemaster_db, updatedatemaster_db                                                     string
 		)
 
 		err = row.Scan(&idmaster_db, &startjoinmaster_db, &endjoinmaster_db,
 			&idcurr_db, &nmmaster_db, &nmowner_db, &phone1owner_db, &phone2owner_db, &emailowner_db, &notemaster_db, &statusmaster_db,
+			&idbanktype_db, &norekbank_db, &nmownerbank_db,
 			&createmaster_db, &createdatemaster_db, &updatemaster_db, &updatedatemaster_db)
 
 		helpers.ErrorCheck(err)
@@ -75,6 +78,9 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 		obj.Master_phone2 = phone2owner_db
 		obj.Master_email = emailowner_db
 		obj.Master_note = notemaster_db
+		obj.Master_bank_id = idbanktype_db
+		obj.Master_bank_name = nmownerbank_db
+		obj.Master_bank_norek = norekbank_db
 		obj.Master_status = statusmaster_db
 		obj.Master_status_css = status_css
 		obj.Master_create = create
@@ -107,21 +113,23 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 	defer rowcurr.Close()
 
 	sql_selectbank := `SELECT 
-			idbanktype  
-			FROM ` + configs.DB_tbl_mst_banktype + ` 
-			ORDER BY idbanktype ASC    
+			B.nmcatebank, A.idbanktype  
+			FROM ` + configs.DB_tbl_mst_banktype + ` as A 
+			JOIN ` + configs.DB_tbl_mst_cate_bank + ` as B ON B.idcatebank = A.idcatebank 
+			ORDER BY B.nmcatebank,A.idbanktype ASC    
 	`
 	rowbank, errbank := con.QueryContext(ctx, sql_selectbank)
 	helpers.ErrorCheck(errbank)
 	for rowbank.Next() {
 		var (
-			idbanktype_db string
+			nmcatebank_db, idbanktype_db string
 		)
 
-		errbank = rowbank.Scan(&idbanktype_db)
+		errbank = rowbank.Scan(&nmcatebank_db, &idbanktype_db)
 
 		helpers.ErrorCheck(errbank)
 
+		objbank.Catebank_name = nmcatebank_db
 		objbank.Banktype_id = idbanktype_db
 		arraobjbank = append(arraobjbank, objbank)
 		msg = "Success"
@@ -137,7 +145,7 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 
 	return res, nil
 }
-func Save_master(admin, idrecord, idcurr, name, owner, phone1, phone2, email, note, status, sData string) (helpers.Response, error) {
+func Save_master(admin, idrecord, idcurr, name, owner, phone1, phone2, email, note, status, idbanktype, norekbank, nmownerbank, sData string) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
 	tglnow, _ := goment.New()
@@ -151,17 +159,20 @@ func Save_master(admin, idrecord, idcurr, name, owner, phone1, phone2, email, no
 				insert into
 				` + database_master_local + ` (
 					idmaster , startjoinmaster, endjoinmaster, 
-					idcurr , nmmaster, nmowner , phone1owner, phone2owner, emailowner, notemaster, statusmaster,  
+					idcurr , nmmaster, nmowner , phone1owner, phone2owner, emailowner, notemaster, statusmaster, 
+					idbanktype , norekbank, nmownerbank, 
 					createmaster, createdatemaster   
 				) values (
 					$1, $2, $3,    
 					$4, $5, $6, $7, $8, $9, $10, $11,    
-					$12, $13 
+					$12, $13, $14,  
+					$15, $16  
 				)
 			`
 			start := tglnow.Format("YYYY-MM-DD HH:mm:ss")
 			flag_insert, msg_insert := Exec_SQL(sql_insert, database_master_local, "INSERT",
 				idrecord, start, start, idcurr, name, owner, phone1, phone2, email, note, status,
+				idbanktype, norekbank, nmownerbank,
 				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
 
 			if flag_insert {
@@ -177,12 +188,14 @@ func Save_master(admin, idrecord, idcurr, name, owner, phone1, phone2, email, no
 				UPDATE 
 				` + database_master_local + `  
 				SET idcurr=$1, nmmaster=$2, nmowner=$3,  phone1owner=$4,  phone2owner=$5, emailowner=$6, notemaster=$7, statusmaster=$8,  
-				updatemaster=$9, updatedatemaster=$10     
-				WHERE idmaster=$11    
+				idbanktype=$9, norekbank=$10, nmownerbank=$11,      
+				updatemaster=$12, updatedatemaster=$13      
+				WHERE idmaster=$14     
 			`
 
 		flag_update, msg_update := Exec_SQL(sql_update, database_master_local, "UPDATE",
 			idcurr, name, owner, phone1, phone2, email, note, status,
+			idbanktype, norekbank, nmownerbank,
 			admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
 
 		if flag_update {

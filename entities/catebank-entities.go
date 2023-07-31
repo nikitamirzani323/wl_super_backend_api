@@ -19,7 +19,8 @@ type Model_bankType struct {
 	Banktype_update     string `json:"banktype_update"`
 }
 type Model_bankTypeshare struct {
-	Banktype_id string `json:"banktype_id"`
+	Catebank_name string `json:"catebank_name"`
+	Banktype_id   string `json:"banktype_id"`
 }
 
 type Controller_catebanksave struct {

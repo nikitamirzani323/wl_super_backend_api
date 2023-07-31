@@ -40,6 +40,9 @@ func Masterhome(c *fiber.Ctx) error {
 		master_phone2, _ := jsonparser.GetString(value, "master_phone2")
 		master_email, _ := jsonparser.GetString(value, "master_email")
 		master_note, _ := jsonparser.GetString(value, "master_note")
+		master_bank_id, _ := jsonparser.GetString(value, "master_bank_id")
+		master_bank_norek, _ := jsonparser.GetString(value, "master_bank_norek")
+		master_bank_name, _ := jsonparser.GetString(value, "master_bank_name")
 		master_status, _ := jsonparser.GetString(value, "master_status")
 		master_status_css, _ := jsonparser.GetString(value, "master_status_css")
 		master_create, _ := jsonparser.GetString(value, "master_create")
@@ -55,6 +58,9 @@ func Masterhome(c *fiber.Ctx) error {
 		obj.Master_phone2 = master_phone2
 		obj.Master_email = master_email
 		obj.Master_note = master_note
+		obj.Master_bank_id = master_bank_id
+		obj.Master_bank_name = master_bank_name
+		obj.Master_bank_norek = master_bank_norek
 		obj.Master_status = master_status
 		obj.Master_status_css = master_status_css
 		obj.Master_create = master_create
@@ -68,8 +74,10 @@ func Masterhome(c *fiber.Ctx) error {
 		arraobjcurr = append(arraobjcurr, objcurr)
 	})
 	jsonparser.ArrayEach(listbank_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		catebank_name, _ := jsonparser.GetString(value, "catebank_name")
 		banktype_id, _ := jsonparser.GetString(value, "banktype_id")
 
+		objbank.Catebank_name = catebank_name
 		objbank.Banktype_id = banktype_id
 		arraobjbank = append(arraobjbank, objbank)
 	})
@@ -132,9 +140,13 @@ func MasterSave(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
 
+	//admin, idrecord, idcurr, name, owner, phone1, phone2, email, note, status,
+	// idbanktype, norekbank, nmownerbank, sData string
 	result, err := models.Save_master(
 		client_admin,
-		client.Master_id, client.Master_idcurr, client.Master_name, client.Master_owner, client.Master_phone1, client.Master_phone2, client.Master_email, client.Master_note, client.Master_status, client.Sdata)
+		client.Master_id, client.Master_idcurr, client.Master_name, client.Master_owner, client.Master_phone1, client.Master_phone2, client.Master_email, client.Master_note, client.Master_status,
+		client.Master_bank_id, client.Master_bank_norek, client.Master_bank_name,
+		client.Sdata)
 	if err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
