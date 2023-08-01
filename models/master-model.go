@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,6 +15,7 @@ import (
 )
 
 const database_master_local = configs.DB_tbl_mst_master
+const database_masteradmin_local = configs.DB_tbl_mst_master_admin
 
 func Fetch_masterHome() (helpers.Responsemaster, error) {
 	var obj entities.Model_master
@@ -72,7 +74,7 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 		var objmasteradmin entities.Model_masteradmin
 		var arraobjmasteradmin []entities.Model_masteradmin
 		sql_selectmasteradmin := `SELECT 
-			idmasteradmin, tipe_masteradmin, username_masteradmin, name_masteradmin, statusmasteradmin,  
+			idmasteradmin,tipe_masteradmin, username_masteradmin, name_masteradmin, phone1_masteradmin,phone2_masteradmin, statusmasteradmin,  
 			createmasteradmin, to_char(COALESCE(createdatemasteradmin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
 			updatemasteradmin, to_char(COALESCE(updatedatemasteradmin,now()), 'YYYY-MM-DD HH24:MI:SS') 
 			FROM ` + configs.DB_tbl_mst_master_admin + ` 
@@ -82,11 +84,11 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 		helpers.ErrorCheck(err)
 		for row_banktype.Next() {
 			var (
-				idmasteradmin_db                                                                               int
-				tipe_masteradmin_db, username_masteradmin_db, name_masteradmin_db, statusmasteradmin_db        string
-				createmasteradmin_db, createdatemasteradmin_db, updatemasteradmin_db, updatedatemasteradmin_db string
+				idmasteradmin_db                                                                                                                      int
+				tipe_masteradmin_db, username_masteradmin_db, name_masteradmin_db, phone1_masteradmin_db, phone2_masteradmin_db, statusmasteradmin_db string
+				createmasteradmin_db, createdatemasteradmin_db, updatemasteradmin_db, updatedatemasteradmin_db                                        string
 			)
-			err = row_banktype.Scan(&idmasteradmin_db, &tipe_masteradmin_db, &username_masteradmin_db, &name_masteradmin_db, &statusmasteradmin_db,
+			err = row_banktype.Scan(&idmasteradmin_db, &tipe_masteradmin_db, &username_masteradmin_db, &name_masteradmin_db, &phone1_masteradmin_db, &phone2_masteradmin_db, &statusmasteradmin_db,
 				&createmasteradmin_db, &createdatemasteradmin_db, &updatemasteradmin_db, &updatedatemasteradmin_db)
 
 			create_admin := ""
@@ -106,6 +108,8 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 			objmasteradmin.Masteradmin_tipe = tipe_masteradmin_db
 			objmasteradmin.Masteradmin_username = username_masteradmin_db
 			objmasteradmin.Masteradmin_name = name_masteradmin_db
+			objmasteradmin.Masteradmin_phone1 = phone1_masteradmin_db
+			objmasteradmin.Masteradmin_phone2 = phone2_masteradmin_db
 			objmasteradmin.Masteradmin_status = statusmasteradmin_db
 			objmasteradmin.Masteradmin_status_css = status_css_admin
 			objmasteradmin.Masteradmin_create = create_admin
@@ -249,6 +253,91 @@ func Save_master(admin, idrecord, idcurr, name, owner, phone1, phone2, email, no
 			msg = "Succes"
 		} else {
 			fmt.Println(msg_update)
+		}
+	}
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = nil
+	res.Time = time.Since(render_page).String()
+
+	return res, nil
+}
+func Save_masteradmin(admin, idmaster, tipe, username, password, name, phone1, phone2, status, sData string, idrecord int) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+	flag := false
+
+	if sData == "New" {
+		flag = CheckDB(database_masteradmin_local, "username_masteradmin", username)
+		if !flag {
+			sql_insert := `
+				insert into
+				` + database_masteradmin_local + ` (
+					idmasteradmin, idmaster , tipe_masteradmin, username_masteradmin, password_masteradmin, 
+					name_masteradmin , phone1_masteradmin, phone2_masteradmin, statusmasteradmin, 
+					createmasteradmin, createdatemasteradmin   
+				) values (
+					$1, $2, $3, $4, $5,   
+					$6, $7, $8, $9, 
+					$10, $11
+				)
+			`
+			field_column := database_masteradmin_local + tglnow.Format("YYYY")
+			idrecord_counter := Get_counter(field_column)
+			hashpass := helpers.HashPasswordMD5(password)
+			flag_insert, msg_insert := Exec_SQL(sql_insert, database_masteradmin_local, "INSERT",
+				tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idmaster, tipe, username, hashpass, name, phone1, phone2, status,
+				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+			if flag_insert {
+				msg = "Succes"
+			} else {
+				fmt.Println(msg_insert)
+			}
+		} else {
+			msg = "Duplicate Entry"
+		}
+	} else {
+		if password == "" {
+			sql_update := `
+				UPDATE 
+				` + database_masteradmin_local + `  
+				SET tipe_masteradmin=$1, name_masteradmin=$2, phone1_masteradmin=$3, phone2_masteradmin=$4, statusmasteradmin=$5,  
+				updatemasteradmin=$6, updatedatemasteradmin=$7        
+				WHERE idmaster=$8 AND idmasteradmin=$9        
+			`
+
+			flag_update, msg_update := Exec_SQL(sql_update, database_masteradmin_local, "UPDATE",
+				tipe, name, phone1, phone2, status,
+				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idmaster, idrecord)
+
+			if flag_update {
+				msg = "Succes"
+			} else {
+				fmt.Println(msg_update)
+			}
+		} else {
+			hashpass := helpers.HashPasswordMD5(password)
+			sql_update := `
+				UPDATE 
+				` + database_masteradmin_local + `  
+				SET tipe_masteradmin=$1, password_masteradmin=$2, name_masteradmin=$3, phone1_masteradmin=$4, phone2_masteradmin=$5, statusmasteradmin=$6,  
+				updatemasteradmin=$7, updatedatemasteradmin=$8         
+				WHERE idmaster=$9 AND idmasteradmin=$10        
+			`
+
+			flag_update, msg_update := Exec_SQL(sql_update, database_masteradmin_local, "UPDATE",
+				tipe, hashpass, name, phone1, phone2, status,
+				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idmaster, idrecord)
+
+			if flag_update {
+				msg = "Succes"
+			} else {
+				fmt.Println(msg_update)
+			}
 		}
 	}
 

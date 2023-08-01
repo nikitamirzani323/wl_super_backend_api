@@ -27,6 +27,8 @@ type Model_masteradmin struct {
 	Masteradmin_tipe       string `json:"masteradmin_tipe"`
 	Masteradmin_username   string `json:"masteradmin_username"`
 	Masteradmin_name       string `json:"masteradmin_name"`
+	Masteradmin_phone1     string `json:"masteradmin_phone1"`
+	Masteradmin_phone2     string `json:"masteradmin_phone2"`
 	Masteradmin_status     string `json:"masteradmin_status"`
 	Masteradmin_status_css string `json:"masteradmin_status_css"`
 	Masteradmin_create     string `json:"masteradmin_create"`
@@ -48,4 +50,17 @@ type Controller_mastersave struct {
 	Master_bank_norek string `json:"master_bank_norek" validate:"required"`
 	Master_bank_name  string `json:"master_bank_name" validate:"required"`
 	Master_status     string `json:"master_status" validate:"required"`
+}
+type Controller_masteradminsave struct {
+	Page                 string `json:"page" validate:"required"`
+	Sdata                string `json:"sdata" validate:"required"`
+	Masteradmin_id       int    `json:"masteradmin_id" `
+	Masteradmin_idmaster string `json:"masteradmin_idmaster" validate:"required"`
+	Masteradmin_tipe     string `json:"masteradmin_tipe" validate:"required"`
+	Masteradmin_username string `json:"masteradmin_username" validate:"required"`
+	Masteradmin_password string `json:"masteradmin_password" `
+	Masteradmin_name     string `json:"masteradmin_name" validate:"required"`
+	Masteradmin_phone1   string `json:"masteradmin_phone1" validate:"required"`
+	Masteradmin_phone2   string `json:"masteradmin_phone2" `
+	Masteradmin_status   string `json:"masteradmin_status" validate:"required"`
 }

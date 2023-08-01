@@ -56,6 +56,8 @@ func Masterhome(c *fiber.Ctx) error {
 			masteradmin_tipe, _ := jsonparser.GetString(value, "masteradmin_tipe")
 			masteradmin_username, _ := jsonparser.GetString(value, "masteradmin_username")
 			masteradmin_name, _ := jsonparser.GetString(value, "masteradmin_name")
+			masteradmin_phone1, _ := jsonparser.GetString(value, "masteradmin_phone1")
+			masteradmin_phone2, _ := jsonparser.GetString(value, "masteradmin_phone2")
 			masteradmin_status, _ := jsonparser.GetString(value, "masteradmin_status")
 			masteradmin_status_css, _ := jsonparser.GetString(value, "masteradmin_status_css")
 			masteradmin_create, _ := jsonparser.GetString(value, "masteradmin_create")
@@ -65,6 +67,8 @@ func Masterhome(c *fiber.Ctx) error {
 			objmasteradmin.Masteradmin_tipe = masteradmin_tipe
 			objmasteradmin.Masteradmin_username = masteradmin_username
 			objmasteradmin.Masteradmin_name = masteradmin_name
+			objmasteradmin.Masteradmin_phone1 = masteradmin_phone1
+			objmasteradmin.Masteradmin_phone2 = masteradmin_phone2
 			objmasteradmin.Masteradmin_status = masteradmin_status
 			objmasteradmin.Masteradmin_status_css = masteradmin_status_css
 			objmasteradmin.Masteradmin_create = masteradmin_create
@@ -184,7 +188,56 @@ func MasterSave(c *fiber.Ctx) error {
 	_deleteredis_master()
 	return c.JSON(result)
 }
+func MasteradminSave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_masteradminsave)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
 
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Save_masteradmin(
+		client_admin,
+		client.Masteradmin_idmaster, client.Masteradmin_tipe, client.Masteradmin_username, client.Masteradmin_password,
+		client.Masteradmin_name, client.Masteradmin_phone1, client.Masteradmin_phone2, client.Masteradmin_status, client.Sdata, client.Masteradmin_id)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	_deleteredis_master()
+	return c.JSON(result)
+}
 func _deleteredis_master() {
 	val_master := helpers.DeleteRedis(Fieldmaster_home_redis)
 	fmt.Printf("Redis Delete BACKEND CATEBANK : %d", val_master)
