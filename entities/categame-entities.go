@@ -13,7 +13,10 @@ type Model_game struct {
 	Game_id            string `json:"game_id"`
 	Game_idcategame    string `json:"game_idcategame"`
 	Game_idprovider    int    `json:"game_idprovider"`
+	Game_nmprovider    string `json:"game_nmprovider"`
 	Game_name          string `json:"game_name"`
+	Game_img           string `json:"game_img"`
+	Game_multiplier    int    `json:"game_multiplier"`
 	Game_urlstaging    string `json:"game_urlstaging"`
 	Game_urlproduction string `json:"game_urlproduction"`
 	Game_status        string `json:"game_status"`
@@ -35,6 +38,8 @@ type Controller_gamesave struct {
 	Game_idcategame    string `json:"game_idcategame" validate:"required"`
 	Game_idprovider    int    `json:"game_idprovider" validate:"required"`
 	Game_name          string `json:"game_name" validate:"required"`
+	Game_img           string `json:"game_img" validate:"required"`
+	Game_multiplier    int    `json:"game_multiplier" validate:"required"`
 	Game_urlstaging    string `json:"game_urlstaging" validate:"required"`
 	Game_urlproduction string `json:"game_urlproduction" validate:"required"`
 	Game_status        string `json:"game_status" validate:"required"`

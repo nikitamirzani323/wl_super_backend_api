@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"strconv"
@@ -63,7 +64,7 @@ func Fetch_categameHome() (helpers.Responseprovider, error) {
 		var objgame entities.Model_game
 		var arraobjgame []entities.Model_game
 		sql_selectgame := `SELECT 
-			idgame , idprovider, nmgame, urlstaging, urlproduction, statusgame,   
+			idgame , idprovider, nmgame, imggame, multiplier, urlstaging, urlproduction, statusgame,   
 			creategame, to_char(COALESCE(createdategame,now()), 'YYYY-MM-DD HH24:MI:SS'), 
 			updategame, to_char(COALESCE(updatedategame,now()), 'YYYY-MM-DD HH24:MI:SS') 
 			FROM ` + database_game_local + ` 
@@ -75,17 +76,17 @@ func Fetch_categameHome() (helpers.Responseprovider, error) {
 		helpers.ErrorCheck(err)
 		for row_game.Next() {
 			var (
-				idprovider_db                                                      int
-				idgame_db                                                          string
-				nmgame_db, urlstaging_db, urlproduction_db, statusgame_db          string
-				creategame_db, createdategame_db, updategame_db, updatedategame_db string
+				idprovider_db, multiplier_db                                                     int
+				idgame_db, nmgame_db, imggame_db, urlstaging_db, urlproduction_db, statusgame_db string
+				creategame_db, createdategame_db, updategame_db, updatedategame_db               string
 			)
 			err = row_game.Scan(&idgame_db, &idprovider_db,
-				&nmgame_db, &urlstaging_db, &urlproduction_db, &statusgame_db,
+				&nmgame_db, &imggame_db, &multiplier_db, &urlstaging_db, &urlproduction_db, &statusgame_db,
 				&creategame_db, &createdategame_db, &updategame_db, &updatedategame_db)
 			log.Println(idgame_db)
 			create_game := ""
 			update_game := ""
+			nmprovider := _GetProvider(idprovider_db)
 			status_game_css := configs.STATUS_CANCEL
 			if creategame_db != "" {
 				create_game = creategame_db + ", " + createdategame_db
@@ -100,7 +101,10 @@ func Fetch_categameHome() (helpers.Responseprovider, error) {
 			objgame.Game_id = idgame_db
 			objgame.Game_idcategame = idcategame_db
 			objgame.Game_idprovider = idprovider_db
+			objgame.Game_nmprovider = nmprovider
 			objgame.Game_name = nmgame_db
+			objgame.Game_img = imggame_db
+			objgame.Game_multiplier = multiplier_db
 			objgame.Game_urlstaging = urlstaging_db
 			objgame.Game_urlproduction = urlproduction_db
 			objgame.Game_status = statusgame_db
@@ -214,7 +218,7 @@ func Save_categame(admin, idrecord, name, status, sData string) (helpers.Respons
 
 	return res, nil
 }
-func Save_game(admin, idrecord, idcategame, name, urlstaging, urlproduction, status, sData string, idprovider int) (helpers.Response, error) {
+func Save_game(admin, idrecord, idcategame, name, img, urlstaging, urlproduction, status, sData string, idprovider, multiplier int) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
 	tglnow, _ := goment.New()
@@ -225,19 +229,20 @@ func Save_game(admin, idrecord, idcategame, name, urlstaging, urlproduction, sta
 				insert into
 				` + database_game_local + ` (
 					idgame, idcategame , idprovider, 
-					nmgame, urlstaging, urlproduction, statusgame, 
+					nmgame, imggame , multiplier, urlstaging, urlproduction, statusgame, 
 					creategame, createdategame  
 				) values (
 					$1, $2, $3,   
-					$4, $5, $6, $7,   
-					$8, $9 
+					$4, $5, $6, $7, $8, $9,
+					$10, $11  
+					 
 				)
 			`
 		field_column := database_game_local + tglnow.Format("YYYY")
 		idrecord_counter := Get_counter(field_column)
 		flag_insert, msg_insert := Exec_SQL(sql_insert, database_game_local, "INSERT",
 			idcategame+tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idcategame, idprovider,
-			name, urlstaging, urlproduction, status,
+			name, img, multiplier, urlstaging, urlproduction, status,
 			admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
 
 		if flag_insert {
@@ -250,13 +255,13 @@ func Save_game(admin, idrecord, idcategame, name, urlstaging, urlproduction, sta
 				UPDATE 
 				` + database_game_local + `  
 				SET idcategame=$1, idprovider=$2,   
-				nmgame=$3, urlstaging=$4, urlproduction=$5, statusgame=$6,      
-				updategame=$7, updatedategame=$8     
-				WHERE idgame=$9    
+				nmgame=$3, imggame=$4, multiplier=$5, urlstaging=$6, urlproduction=$7, statusgame=$8,      
+				updategame=$9, updatedategame=$10     
+				WHERE idgame=$11     
 			`
 
 		flag_update, msg_update := Exec_SQL(sql_update, database_categame_local, "UPDATE",
-			idcategame, idprovider, name, urlstaging, urlproduction, status,
+			idcategame, idprovider, name, img, multiplier, urlstaging, urlproduction, status,
 			admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
 
 		if flag_update {
@@ -272,4 +277,24 @@ func Save_game(admin, idrecord, idcategame, name, urlstaging, urlproduction, sta
 	res.Time = time.Since(render_page).String()
 
 	return res, nil
+}
+
+func _GetProvider(idrecord int) string {
+	con := db.CreateCon()
+	ctx := context.Background()
+	nmprovider := ""
+
+	sql_select := `SELECT
+		nmprovider   
+		FROM ` + configs.DB_tbl_mst_provider + `  
+		WHERE idprovider = $1 
+	`
+	row := con.QueryRowContext(ctx, sql_select, idrecord)
+	switch e := row.Scan(&nmprovider); e {
+	case sql.ErrNoRows:
+	case nil:
+	default:
+		helpers.ErrorCheck(e)
+	}
+	return nmprovider
 }

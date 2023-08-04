@@ -41,7 +41,10 @@ func CateGamehome(c *fiber.Ctx) error {
 			game_id, _ := jsonparser.GetString(value, "game_id")
 			game_idcategame, _ := jsonparser.GetString(value, "game_idcategame")
 			game_idprovider, _ := jsonparser.GetInt(value, "game_idprovider")
+			game_nmprovider, _ := jsonparser.GetString(value, "game_nmprovider")
 			game_name, _ := jsonparser.GetString(value, "game_name")
+			game_img, _ := jsonparser.GetString(value, "game_img")
+			game_multiplier, _ := jsonparser.GetInt(value, "game_multiplier")
 			game_urlstaging, _ := jsonparser.GetString(value, "game_urlstaging")
 			game_urlproduction, _ := jsonparser.GetString(value, "game_urlproduction")
 			game_status, _ := jsonparser.GetString(value, "game_status")
@@ -52,7 +55,10 @@ func CateGamehome(c *fiber.Ctx) error {
 			objgame.Game_id = game_id
 			objgame.Game_idcategame = game_idcategame
 			objgame.Game_idprovider = int(game_idprovider)
+			objgame.Game_nmprovider = game_nmprovider
 			objgame.Game_name = game_name
+			objgame.Game_img = game_img
+			objgame.Game_multiplier = int(game_multiplier)
 			objgame.Game_urlstaging = game_urlstaging
 			objgame.Game_urlproduction = game_urlproduction
 			objgame.Game_status = game_status
@@ -187,12 +193,11 @@ func GameSave(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
 
-	// admin, idrecord, idcategame, name, urlstaging, urlproduction, status, sData string, idprovider int) (helpers.Response, error
 	result, err := models.Save_game(
 		client_admin,
-		client.Game_id, client.Game_idcategame, client.Game_name,
+		client.Game_id, client.Game_idcategame, client.Game_name, client.Game_img,
 		client.Game_urlstaging, client.Game_urlproduction, client.Game_status,
-		client.Sdata, client.Game_idprovider)
+		client.Sdata, client.Game_idprovider, client.Game_multiplier)
 	if err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
