@@ -19,9 +19,12 @@ const Fieldcategame_home_client_redis = "LISTCATEGAME_FRONTEND"
 func CateGamehome(c *fiber.Ctx) error {
 	var obj entities.Model_categame
 	var arraobj []entities.Model_categame
+	var objprovider entities.Model_providershare
+	var arraobjprovider []entities.Model_providershare
 	render_page := time.Now()
 	resultredis, flag := helpers.GetRedis(Fieldcategame_home_redis)
 	jsonredis := []byte(resultredis)
+	listprovider_RD, _, _, _ := jsonparser.Get(jsonredis, "listprovider")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		categame_id, _ := jsonparser.GetString(value, "categame_id")
@@ -31,15 +34,51 @@ func CateGamehome(c *fiber.Ctx) error {
 		categame_create, _ := jsonparser.GetString(value, "categame_create")
 		categame_update, _ := jsonparser.GetString(value, "categame_update")
 
+		var objgame entities.Model_game
+		var arraobjgame []entities.Model_game
+		record_game_RD, _, _, _ := jsonparser.Get(value, "categame_list")
+		jsonparser.ArrayEach(record_game_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			game_id, _ := jsonparser.GetString(value, "game_id")
+			game_idcategame, _ := jsonparser.GetString(value, "game_idcategame")
+			game_idprovider, _ := jsonparser.GetInt(value, "game_idprovider")
+			game_name, _ := jsonparser.GetString(value, "game_name")
+			game_urlstaging, _ := jsonparser.GetString(value, "game_urlstaging")
+			game_urlproduction, _ := jsonparser.GetString(value, "game_urlproduction")
+			game_status, _ := jsonparser.GetString(value, "game_status")
+			game_status_css, _ := jsonparser.GetString(value, "game_status_css")
+			game_create, _ := jsonparser.GetString(value, "game_create")
+			game_update, _ := jsonparser.GetString(value, "game_update")
+
+			objgame.Game_id = game_id
+			objgame.Game_idcategame = game_idcategame
+			objgame.Game_idprovider = int(game_idprovider)
+			objgame.Game_name = game_name
+			objgame.Game_urlstaging = game_urlstaging
+			objgame.Game_urlproduction = game_urlproduction
+			objgame.Game_status = game_status
+			objgame.Game_status_css = game_status_css
+			objgame.Game_create = game_create
+			objgame.Game_update = game_update
+			arraobjgame = append(arraobjgame, objgame)
+		})
+
 		obj.Categame_id = categame_id
 		obj.Categame_name = categame_name
+		obj.Categame_list = arraobjgame
 		obj.Categame_status = categame_status
 		obj.Categame_status_css = categame_status_css
 		obj.Categame_create = categame_create
 		obj.Categame_update = categame_update
 		arraobj = append(arraobj, obj)
 	})
+	jsonparser.ArrayEach(listprovider_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		provider_id, _ := jsonparser.GetInt(value, "provider_id")
+		provider_name, _ := jsonparser.GetString(value, "provider_name")
 
+		objprovider.Provider_id = int(provider_id)
+		objprovider.Provider_name = provider_name
+		arraobjprovider = append(arraobjprovider, objprovider)
+	})
 	if !flag {
 		result, err := models.Fetch_categameHome()
 		if err != nil {
@@ -56,10 +95,11 @@ func CateGamehome(c *fiber.Ctx) error {
 	} else {
 		fmt.Println("CATEGAME CACHE")
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusOK,
-			"message": "Success",
-			"record":  arraobj,
-			"time":    time.Since(render_page).String(),
+			"status":       fiber.StatusOK,
+			"message":      "Success",
+			"record":       arraobj,
+			"listprovider": arraobjprovider,
+			"time":         time.Since(render_page).String(),
 		})
 	}
 }

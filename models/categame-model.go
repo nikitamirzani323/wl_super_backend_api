@@ -3,6 +3,8 @@ package models
 import (
 	"context"
 	"fmt"
+	"log"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,10 +18,10 @@ import (
 const database_categame_local = configs.DB_tbl_mst_cate_game
 const database_game_local = configs.DB_tbl_mst_game
 
-func Fetch_categameHome() (helpers.Response, error) {
+func Fetch_categameHome() (helpers.Responseprovider, error) {
 	var obj entities.Model_categame
 	var arraobj []entities.Model_categame
-	var res helpers.Response
+	var res helpers.Responseprovider
 	msg := "Data Not Found"
 	con := db.CreateCon()
 	ctx := context.Background()
@@ -61,26 +63,27 @@ func Fetch_categameHome() (helpers.Response, error) {
 		var objgame entities.Model_game
 		var arraobjgame []entities.Model_game
 		sql_selectgame := `SELECT 
-			idgame , idcategame, idprovider, nmgame, urlstaging, urlproduction, statusgame  
+			idgame , idprovider, nmgame, urlstaging, urlproduction, statusgame,   
 			creategame, to_char(COALESCE(createdategame,now()), 'YYYY-MM-DD HH24:MI:SS'), 
 			updategame, to_char(COALESCE(updatedategame,now()), 'YYYY-MM-DD HH24:MI:SS') 
 			FROM ` + database_game_local + ` 
 			WHERE idcategame = $1   
 			ORDER BY createdategame DESC 
 		`
+
 		row_game, err := con.QueryContext(ctx, sql_selectgame, idcategame_db)
 		helpers.ErrorCheck(err)
 		for row_game.Next() {
 			var (
 				idprovider_db                                                      int
-				idgame_db, idcategame_db                                           string
+				idgame_db                                                          string
 				nmgame_db, urlstaging_db, urlproduction_db, statusgame_db          string
 				creategame_db, createdategame_db, updategame_db, updatedategame_db string
 			)
-			err = row_game.Scan(&idgame_db, &idcategame_db, &idprovider_db,
+			err = row_game.Scan(&idgame_db, &idprovider_db,
 				&nmgame_db, &urlstaging_db, &urlproduction_db, &statusgame_db,
 				&creategame_db, &createdategame_db, &updategame_db, &updatedategame_db)
-
+			log.Println(idgame_db)
 			create_game := ""
 			update_game := ""
 			status_game_css := configs.STATUS_CANCEL
@@ -94,7 +97,7 @@ func Fetch_categameHome() (helpers.Response, error) {
 				status_game_css = configs.STATUS_COMPLETE
 			}
 
-			objgame.Game_id = idcategame_db
+			objgame.Game_id = idgame_db
 			objgame.Game_idcategame = idcategame_db
 			objgame.Game_idprovider = idprovider_db
 			objgame.Game_name = nmgame_db
@@ -106,6 +109,7 @@ func Fetch_categameHome() (helpers.Response, error) {
 			objgame.Game_update = update_game
 			arraobjgame = append(arraobjgame, objgame)
 		}
+		defer row_game.Close()
 
 		obj.Categame_id = idcategame_db
 		obj.Categame_name = nmcategame_db
@@ -119,9 +123,33 @@ func Fetch_categameHome() (helpers.Response, error) {
 	}
 	defer row.Close()
 
+	//PROVIDER
+	var objprovider entities.Model_providershare
+	var arraobjprovider []entities.Model_providershare
+	sql_selectprovider := `SELECT 
+		idprovider, nmprovider
+		FROM ` + configs.DB_tbl_mst_provider + ` 
+		WHERE statusprovider = 'Y'   
+	`
+	row_provider, err := con.QueryContext(ctx, sql_selectprovider)
+	helpers.ErrorCheck(err)
+	for row_provider.Next() {
+		var (
+			idprovider_db int
+			nmprovider_db string
+		)
+		err = row_provider.Scan(&idprovider_db, &nmprovider_db)
+
+		objprovider.Provider_id = idprovider_db
+		objprovider.Provider_name = nmprovider_db
+		arraobjprovider = append(arraobjprovider, objprovider)
+	}
+	defer row_provider.Close()
+
 	res.Status = fiber.StatusOK
 	res.Message = msg
 	res.Record = arraobj
+	res.Listprovider = arraobjprovider
 	res.Time = time.Since(start).String()
 
 	return res, nil
@@ -191,15 +219,12 @@ func Save_game(admin, idrecord, idcategame, name, urlstaging, urlproduction, sta
 	msg := "Failed"
 	tglnow, _ := goment.New()
 	render_page := time.Now()
-	flag := false
 
 	if sData == "New" {
-		flag = CheckDB(database_game_local, "idgame", idrecord)
-		if !flag {
-			sql_insert := `
+		sql_insert := `
 				insert into
 				` + database_game_local + ` (
-					idgame, idcategame ,idprovider , 
+					idgame, idcategame , idprovider, 
 					nmgame, urlstaging, urlproduction, statusgame, 
 					creategame, createdategame  
 				) values (
@@ -208,19 +233,17 @@ func Save_game(admin, idrecord, idcategame, name, urlstaging, urlproduction, sta
 					$8, $9 
 				)
 			`
+		field_column := database_game_local + tglnow.Format("YYYY")
+		idrecord_counter := Get_counter(field_column)
+		flag_insert, msg_insert := Exec_SQL(sql_insert, database_game_local, "INSERT",
+			idcategame+tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idcategame, idprovider,
+			name, urlstaging, urlproduction, status,
+			admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
 
-			flag_insert, msg_insert := Exec_SQL(sql_insert, database_game_local, "INSERT",
-				idrecord, idcategame, idprovider,
-				name, urlstaging, urlproduction,
-				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
-
-			if flag_insert {
-				msg = "Succes"
-			} else {
-				fmt.Println(msg_insert)
-			}
+		if flag_insert {
+			msg = "Succes"
 		} else {
-			msg = "Duplicate Entry"
+			fmt.Println(msg_insert)
 		}
 	} else {
 		sql_update := `

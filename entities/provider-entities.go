@@ -13,7 +13,10 @@ type Model_provider struct {
 	Provider_create     string `json:"provider_create"`
 	Provider_update     string `json:"provider_update"`
 }
-
+type Model_providershare struct {
+	Provider_id   int    `json:"provider_id"`
+	Provider_name string `json:"provider_name"`
+}
 type Controller_providersave struct {
 	Page                string `json:"page" validate:"required"`
 	Sdata               string `json:"sdata" validate:"required"`

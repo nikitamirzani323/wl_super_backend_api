@@ -22,6 +22,13 @@ type Responsemaster struct {
 	Listbank interface{} `json:"listbank"`
 	Time     string      `json:"time"`
 }
+type Responseprovider struct {
+	Status       int         `json:"status"`
+	Message      string      `json:"message"`
+	Record       interface{} `json:"record"`
+	Listprovider interface{} `json:"listprovider"`
+	Time         string      `json:"time"`
+}
 type ResponseAdmin struct {
 	Status   int         `json:"status"`
 	Message  string      `json:"message"`
