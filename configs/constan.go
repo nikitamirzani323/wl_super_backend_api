@@ -7,6 +7,7 @@ const (
 	DB_tbl_mst_domain       string = "tbl_mst_domain"
 	DB_tbl_mst_master       string = "tbl_mst_master"
 	DB_tbl_mst_master_admin string = "tbl_mst_master_admin"
+	DB_tbl_mst_master_agen  string = "tbl_mst_master_agen"
 	DB_tbl_mst_curr         string = "tbl_mst_currency"
 	DB_tbl_mst_cate_bank    string = "tbl_mst_catebank"
 	DB_tbl_mst_banktype     string = "tbl_mst_banktype"

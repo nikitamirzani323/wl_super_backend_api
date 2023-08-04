@@ -64,3 +64,20 @@ type Controller_masteradminsave struct {
 	Masteradmin_phone2   string `json:"masteradmin_phone2" `
 	Masteradmin_status   string `json:"masteradmin_status" validate:"required"`
 }
+type Controller_masteragensave struct {
+	Page                  string `json:"page" validate:"required"`
+	Sdata                 string `json:"sdata" validate:"required"`
+	Masteragen_id         string `json:"masteragen_id" validate:"required"`
+	Masteragen_idmaster   string `json:"masteragen_idmaster" validate:"required"`
+	Masteragen_idcurr     string `json:"masteragen_idcurr" validate:"required"`
+	Masteragen_name       string `json:"masteragen_name" validate:"required"`
+	Masteragen_owner      string `json:"masteragen_owner" validate:"required"`
+	Masteragen_phone1     string `json:"masteragen_phone1" validate:"required"`
+	Masteragen_phone2     string `json:"masteragen_phone2"`
+	Masteragen_email      string `json:"masteragen_email"`
+	Masteragen_note       string `json:"masteragen_note"`
+	Masteragen_bank_id    string `json:"masteragen_bank_id" validate:"required"`
+	Masteragen_bank_norek string `json:"masteragen_bank_norek" validate:"required"`
+	Masteragen_bank_name  string `json:"masteragen_bank_name" validate:"required"`
+	Masteragen_status     string `json:"masteragen_status" validate:"required"`
+}

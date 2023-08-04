@@ -16,6 +16,7 @@ import (
 
 const database_master_local = configs.DB_tbl_mst_master
 const database_masteradmin_local = configs.DB_tbl_mst_master_admin
+const database_masteragen_local = configs.DB_tbl_mst_master_agen
 
 func Fetch_masterHome() (helpers.Responsemaster, error) {
 	var obj entities.Model_master
@@ -338,6 +339,70 @@ func Save_masteradmin(admin, idmaster, tipe, username, password, name, phone1, p
 			} else {
 				fmt.Println(msg_update)
 			}
+		}
+	}
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = nil
+	res.Time = time.Since(render_page).String()
+
+	return res, nil
+}
+func Save_masteragen(admin, idrecord, idmaster, idcurr, name, owner, phone1, phone2, email, note, status, idbanktype, norekbank, nmownerbank, sData string) (helpers.Response, error) {
+	var res helpers.Response
+	msg := "Failed"
+	tglnow, _ := goment.New()
+	render_page := time.Now()
+
+	if sData == "New" {
+		sql_insert := `
+				insert into
+				` + database_masteragen_local + ` (
+					idmasteragen, idmaster , startjoinagen, endjoinagen, 
+					idcurr, nmagen, nmowneragen , phone1agen, phone2agen, emailagen, noteagen, statusmasteragen, 
+					idbanktype , norekbank, nmownerbank, 
+					createmasteragen, createdatemasteragen    
+				) values (
+					$1, $2, $3, $4,   
+					$5, $6, $7, $8, $9, $10, $11, $12,     
+					$13, $14, $15,  
+					$16, $17   
+				)
+			`
+		field_column := database_masteragen_local + tglnow.Format("YY") + tglnow.Format("MM")
+		idrecord_counter := Get_counter(field_column)
+		start := tglnow.Format("YYYY-MM-DD HH:mm:ss")
+		flag_insert, msg_insert := Exec_SQL(sql_insert, database_masteragen_local, "INSERT",
+			idmaster+tglnow.Format("YY")+tglnow.Format("MM")+strconv.Itoa(idrecord_counter), idmaster, start, start,
+			idcurr, name, owner, phone1, phone2, email, note, status,
+			idbanktype, norekbank, nmownerbank,
+			admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+
+		if flag_insert {
+			msg = "Succes"
+		} else {
+			fmt.Println(msg_insert)
+		}
+	} else {
+		sql_update := `
+				UPDATE 
+				` + database_masteragen_local + `  
+				SET nmagen=$1, nmowneragen=$2, phone1agen=$3,  phone2agen=$4,  emailagen=$5, noteagen=$6, statusmasteragen=$7, 
+				idbanktype=$9, norekbank=$10, nmownerbank=$11,      
+				updatemasteragen=$12, updatedatemasteragen=$13      
+				WHERE idmasteragen=$14     
+			`
+
+		flag_update, msg_update := Exec_SQL(sql_update, database_masteragen_local, "UPDATE",
+			name, owner, phone1, phone2, email, note, status,
+			idbanktype, norekbank, nmownerbank,
+			admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
+
+		if flag_update {
+			msg = "Succes"
+		} else {
+			fmt.Println(msg_update)
 		}
 	}
 

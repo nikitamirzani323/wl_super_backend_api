@@ -238,6 +238,61 @@ func MasteradminSave(c *fiber.Ctx) error {
 	_deleteredis_master()
 	return c.JSON(result)
 }
+func MasteragenSave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_masteragensave)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	// admin, idrecord, idmaster, idcurr, name, owner, phone1, phone2,
+	// email, note, status, idbanktype, norekbank, nmownerbank, sData string
+	result, err := models.Save_masteragen(
+		client_admin,
+		client.Masteragen_id, client.Masteragen_idmaster,
+		client.Masteragen_idcurr, client.Masteragen_name, client.Masteragen_owner, client.Masteragen_phone1, client.Masteragen_phone2,
+		client.Masteragen_email, client.Masteragen_note, client.Masteragen_status,
+		client.Masteragen_bank_id, client.Masteragen_bank_norek, client.Masteragen_bank_name,
+		client.Sdata)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	_deleteredis_master()
+	return c.JSON(result)
+}
 func _deleteredis_master() {
 	val_master := helpers.DeleteRedis(Fieldmaster_home_redis)
 	fmt.Printf("Redis Delete BACKEND CATEBANK : %d", val_master)

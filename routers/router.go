@@ -67,6 +67,7 @@ func Init() *fiber.App {
 	app.Post("/api/master", middleware.JWTProtected(), controllers.Masterhome)
 	app.Post("/api/mastersave", middleware.JWTProtected(), controllers.MasterSave)
 	app.Post("/api/masteradminsave", middleware.JWTProtected(), controllers.MasteradminSave)
+	app.Post("/api/masteragensave", middleware.JWTProtected(), controllers.MasteragenSave)
 	app.Post("/api/domain", middleware.JWTProtected(), controllers.Domainhome)
 	app.Post("/api/domainsave", middleware.JWTProtected(), controllers.DomainSave)
 
