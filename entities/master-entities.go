@@ -67,7 +67,7 @@ type Controller_masteradminsave struct {
 type Controller_masteragensave struct {
 	Page                  string `json:"page" validate:"required"`
 	Sdata                 string `json:"sdata" validate:"required"`
-	Masteragen_id         string `json:"masteragen_id" validate:"required"`
+	Masteragen_id         string `json:"masteragen_id"`
 	Masteragen_idmaster   string `json:"masteragen_idmaster" validate:"required"`
 	Masteragen_idcurr     string `json:"masteragen_idcurr" validate:"required"`
 	Masteragen_name       string `json:"masteragen_name" validate:"required"`
