@@ -52,7 +52,18 @@ type Model_masteragen struct {
 	Masteragen_create     string `json:"masteragen_create"`
 	Masteragen_update     string `json:"masteragen_update"`
 }
-
+type Model_masteragenadmin struct {
+	Masteragenadmin_id         int    `json:"masteragenadmin_id"`
+	Masteragenadmin_tipe       string `json:"masteragenadmin_tipe"`
+	Masteragenadmin_username   string `json:"masteragenadmin_username"`
+	Masteragenadmin_name       string `json:"masteragenadmin_name"`
+	Masteragenadmin_phone1     string `json:"masteragenadmin_phone1"`
+	Masteragenadmin_phone2     string `json:"masteragenadmin_phone2"`
+	Masteragenadmin_status     string `json:"masteragenadmin_status"`
+	Masteragenadmin_status_css string `json:"masteragenadmin_status_css"`
+	Masteragenadmin_create     string `json:"masteragenadmin_create"`
+	Masteragenadmin_update     string `json:"masteragenadmin_update"`
+}
 type Controller_mastersave struct {
 	Page              string `json:"page" validate:"required"`
 	Sdata             string `json:"sdata" validate:"required"`
@@ -98,4 +109,20 @@ type Controller_masteragensave struct {
 	Masteragen_bank_norek string `json:"masteragen_bank_norek" validate:"required"`
 	Masteragen_bank_name  string `json:"masteragen_bank_name" validate:"required"`
 	Masteragen_status     string `json:"masteragen_status" validate:"required"`
+}
+type Controller_masteragenadmin struct {
+	Masteragen_idmaster string `json:"masteragen_idmaster" validate:"required"`
+}
+type Controller_masteragenadminsave struct {
+	Page                         string `json:"page" validate:"required"`
+	Sdata                        string `json:"sdata" validate:"required"`
+	Masteragenadmin_id           int    `json:"masteragenadmin_id"`
+	Masteragenadmin_idmasteragen string `json:"masteragenadmin_idmasteragen" validate:"required"`
+	Masteragenadmin_tipe         string `json:"masteragenadmin_tipe" validate:"required"`
+	Masteragenadmin_username     string `json:"masteragenadmin_username" validate:"required"`
+	Masteragenadmin_password     string `json:"masteragenadmin_password"`
+	Masteragenadmin_name         string `json:"masteragenadmin_name" validate:"required"`
+	Masteragenadmin_phone1       string `json:"masteragenadmin_phone1" validate:"required"`
+	Masteragenadmin_phone2       string `json:"masteragenadmin_phone2"`
+	Masteragenadmin_status       string `json:"masteragenadmin_status" validate:"required"`
 }
