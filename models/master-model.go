@@ -117,6 +117,62 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 			objmasteradmin.Masteradmin_update = update_admin
 			arraobjmasteradmin = append(arraobjmasteradmin, objmasteradmin)
 		}
+		defer row_banktype.Close()
+
+		//MASTER AGEN
+		var objmasteragen entities.Model_masteragen
+		var arraobjmasteraagen []entities.Model_masteragen
+		sql_selectmasteraagen := `SELECT 
+			idmasteragen,idcurr, nmagen, nmowneragen, phone1agen,phone2agen, emailagen,noteagen,  
+			idbanktype,norekbank, nmownerbank,statusmasteragen,  
+			createmasteragen, to_char(COALESCE(createdatemasteragen,now()), 'YYYY-MM-DD HH24:MI:SS'), 
+			updatemasteragen, to_char(COALESCE(updatedatemasteragen,now()), 'YYYY-MM-DD HH24:MI:SS') 
+			FROM ` + database_masteragen_local + ` 
+			WHERE idmaster = $1   
+		`
+		row_masteragen, err := con.QueryContext(ctx, sql_selectmasteraagen, idmaster_db)
+		helpers.ErrorCheck(err)
+		for row_masteragen.Next() {
+			var (
+				idmasteragen_db, idcurr_db, nmagen_db, nmowneragen_db, phone1agen_db, phone2agen_db, emailagen_db, noteagen_db string
+				idbanktype_db, norekbank_db, nmownerbank_db, statusmasteragen_db                                               string
+				createmasteragen_db, createdatemasteragen_db, updatemasteragen_db, updatedatemasteragen_db                     string
+			)
+			err = row_masteragen.Scan(&idmasteragen_db, &idcurr_db, &nmagen_db, &nmowneragen_db, &phone1agen_db, &phone2agen_db, &emailagen_db, &noteagen_db,
+				&idbanktype_db, &norekbank_db, &nmownerbank_db, &statusmasteragen_db,
+				&createmasteragen_db, &createdatemasteragen_db, &updatemasteragen_db, &updatedatemasteragen_db)
+
+			create_agen := ""
+			update_agen := ""
+			status_css_agen := configs.STATUS_CANCEL
+			if createmasteragen_db != "" {
+				create_agen = createmasteragen_db + ", " + createdatemasteragen_db
+			}
+			if updatemasteragen_db != "" {
+				update_agen = updatemasteragen_db + ", " + updatedatemasteragen_db
+			}
+			if statusmasteragen_db == "Y" {
+				status_css_agen = configs.STATUS_COMPLETE
+			}
+
+			objmasteragen.Masteragen_id = idmasteragen_db
+			objmasteragen.Masteragen_idcurr = idcurr_db
+			objmasteragen.Masteragen_nmagen = nmagen_db
+			objmasteragen.Masteragen_owner = nmowneragen_db
+			objmasteragen.Masteragen_phone1 = phone1agen_db
+			objmasteragen.Masteragen_phone2 = phone2agen_db
+			objmasteragen.Masteragen_email = emailagen_db
+			objmasteragen.Masteragen_note = noteagen_db
+			objmasteragen.Masteragen_bank_id = idbanktype_db
+			objmasteragen.Masteragen_bank_name = nmownerbank_db
+			objmasteragen.Masteragen_bank_norek = norekbank_db
+			objmasteragen.Masteragen_status = statusmasteragen_db
+			objmasteragen.Masteragen_status_css = status_css_agen
+			objmasteragen.Masteragen_create = create_agen
+			objmasteragen.Masteragen_update = update_agen
+			arraobjmasteraagen = append(arraobjmasteraagen, objmasteragen)
+		}
+		defer row_masteragen.Close()
 
 		obj.Master_id = idmaster_db
 		obj.Master_start = startjoinmaster_db
@@ -134,6 +190,7 @@ func Fetch_masterHome() (helpers.Responsemaster, error) {
 		obj.Master_status = statusmaster_db
 		obj.Master_status_css = status_css
 		obj.Master_listadmin = arraobjmasteradmin
+		obj.Master_listagen = arraobjmasteraagen
 		obj.Master_create = create
 		obj.Master_update = update
 		arraobj = append(arraobj, obj)

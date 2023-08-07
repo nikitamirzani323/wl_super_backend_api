@@ -76,6 +76,44 @@ func Masterhome(c *fiber.Ctx) error {
 			arraobjmasteradmin = append(arraobjmasteradmin, objmasteradmin)
 		})
 
+		var objmasteragen entities.Model_masteragen
+		var arraobjmasteragen []entities.Model_masteragen
+		record_listagen_RD, _, _, _ := jsonparser.Get(value, "master_listagen")
+		jsonparser.ArrayEach(record_listagen_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			masteragen_id, _ := jsonparser.GetString(value, "masteragen_id")
+			masteragen_idcurr, _ := jsonparser.GetString(value, "masteragen_idcurr")
+			masteragen_nmagen, _ := jsonparser.GetString(value, "masteragen_nmagen")
+			masteragen_owner, _ := jsonparser.GetString(value, "masteragen_owner")
+			masteragen_phone1, _ := jsonparser.GetString(value, "masteragen_phone1")
+			masteragen_phone2, _ := jsonparser.GetString(value, "masteragen_phone2")
+			masteragen_email, _ := jsonparser.GetString(value, "masteragen_email")
+			masteragen_note, _ := jsonparser.GetString(value, "masteragen_note")
+			masteragen_bank_id, _ := jsonparser.GetString(value, "masteragen_bank_id")
+			masteragen_bank_norek, _ := jsonparser.GetString(value, "masteragen_bank_norek")
+			masteragen_bank_name, _ := jsonparser.GetString(value, "masteragen_bank_name")
+			masteragen_status, _ := jsonparser.GetString(value, "masteragen_status")
+			masteragen_status_css, _ := jsonparser.GetString(value, "masteragen_status_css")
+			masteragen_create, _ := jsonparser.GetString(value, "masteragen_create")
+			masteragen_update, _ := jsonparser.GetString(value, "masteragen_update")
+
+			objmasteragen.Masteragen_id = masteragen_id
+			objmasteragen.Masteragen_idcurr = masteragen_idcurr
+			objmasteragen.Masteragen_nmagen = masteragen_nmagen
+			objmasteragen.Masteragen_owner = masteragen_owner
+			objmasteragen.Masteragen_phone1 = masteragen_phone1
+			objmasteragen.Masteragen_phone2 = masteragen_phone2
+			objmasteragen.Masteragen_email = masteragen_email
+			objmasteragen.Masteragen_note = masteragen_note
+			objmasteragen.Masteragen_bank_id = masteragen_bank_id
+			objmasteragen.Masteragen_bank_name = masteragen_bank_name
+			objmasteragen.Masteragen_bank_norek = masteragen_bank_norek
+			objmasteragen.Masteragen_status = masteragen_status
+			objmasteragen.Masteragen_status_css = masteragen_status_css
+			objmasteragen.Masteragen_create = masteragen_create
+			objmasteragen.Masteragen_update = masteragen_update
+			arraobjmasteragen = append(arraobjmasteragen, objmasteragen)
+		})
+
 		obj.Master_id = master_id
 		obj.Master_start = master_start
 		obj.Master_end = master_end
@@ -90,6 +128,7 @@ func Masterhome(c *fiber.Ctx) error {
 		obj.Master_bank_name = master_bank_name
 		obj.Master_bank_norek = master_bank_norek
 		obj.Master_listadmin = arraobjmasteradmin
+		obj.Master_listagen = arraobjmasteragen
 		obj.Master_status = master_status
 		obj.Master_status_css = master_status_css
 		obj.Master_create = master_create

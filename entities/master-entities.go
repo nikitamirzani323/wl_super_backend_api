@@ -19,6 +19,7 @@ type Model_master struct {
 	Master_credit_in  int         `json:"master_credit_in"`
 	Master_credit_out int         `json:"master_credit_out"`
 	Master_listadmin  interface{} `json:"master_listadmin"`
+	Master_listagen   interface{} `json:"master_listagen"`
 	Master_create     string      `json:"master_create"`
 	Master_update     string      `json:"master_update"`
 }
@@ -33,6 +34,23 @@ type Model_masteradmin struct {
 	Masteradmin_status_css string `json:"masteradmin_status_css"`
 	Masteradmin_create     string `json:"masteradmin_create"`
 	Masteradmin_update     string `json:"masteradmin_update"`
+}
+type Model_masteragen struct {
+	Masteragen_id         string `json:"masteragen_id"`
+	Masteragen_idcurr     string `json:"masteragen_idcurr"`
+	Masteragen_nmagen     string `json:"masteragen_nmagen"`
+	Masteragen_owner      string `json:"masteragen_owner"`
+	Masteragen_phone1     string `json:"masteragen_phone1"`
+	Masteragen_phone2     string `json:"masteragen_phone2"`
+	Masteragen_email      string `json:"masteragen_email"`
+	Masteragen_note       string `json:"masteragen_note"`
+	Masteragen_bank_id    string `json:"masteragen_bank_id"`
+	Masteragen_bank_norek string `json:"masteragen_bank_norek"`
+	Masteragen_bank_name  string `json:"masteragen_bank_name"`
+	Masteragen_status     string `json:"masteragen_status"`
+	Masteragen_status_css string `json:"masteragen_status_css"`
+	Masteragen_create     string `json:"masteragen_create"`
+	Masteragen_update     string `json:"masteragen_update"`
 }
 
 type Controller_mastersave struct {
