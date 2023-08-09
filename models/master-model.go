@@ -263,16 +263,16 @@ func Fetch_masteragenAdmin(idmasteragen string) (helpers.Response, error) {
 	ctx := context.Background()
 	start := time.Now()
 
-	tbl_mst_admin := Get_mappingdatabase_admin(idmasteragen)
+	tbl_mst_admin := configs.DB_tbl_mst_master_agen_admin
 	sql_select := `SELECT 
-			idadmin, tipe_admin, username_admin,     
-			name_admin , phone1_admin, phone2_admin, statusadmin, 
-			to_char(COALESCE(lastlogin_admin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
-			createadmin, to_char(COALESCE(createdateadmin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
-			updateadmin, to_char(COALESCE(updatedateadmin,now()), 'YYYY-MM-DD HH24:MI:SS') 
+			idagenadmin, tipeagen_admin, usernameagen_admin,     
+			nameagen_admin , phone1agen_admin, phone2agen_admin, statusagenadmin, 
+			to_char(COALESCE(lastloginagen_admin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
+			createagenadmin, to_char(COALESCE(createdateagenadmin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
+			updateagenadmin, to_char(COALESCE(updatedateagenadmin,now()), 'YYYY-MM-DD HH24:MI:SS') 
 			FROM ` + tbl_mst_admin + `  
 			WHERE idmasteragen= '` + idmasteragen + `'   
-			ORDER BY lastlogin_admin DESC   `
+			ORDER BY lastloginagen_admin DESC   `
 	log.Println(sql_select)
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
@@ -551,16 +551,16 @@ func Save_masteragenadmin(admin, idrecord, idmasteragen, tipe, username, passwor
 	tglnow, _ := goment.New()
 	render_page := time.Now()
 	flag := false
-	tbl_mst_admin := Get_mappingdatabase_admin(idmasteragen)
+	tbl_mst_admin := configs.DB_tbl_mst_master_agen_admin
 	if sData == "New" {
-		flag = CheckDB(tbl_mst_admin, "username_admin", username)
+		flag = CheckDB(tbl_mst_admin, "usernameagen_admin", username)
 		if !flag {
 			sql_insert := `
 					insert into
 					` + tbl_mst_admin + ` (
-						idadmin, idmasteragen , tipe_admin, username_admin, password_admin, lastlogin_admin,   
-						name_admin, phone1_admin, phone2_admin , statusadmin, 
-						createadmin, createdateadmin    
+						idagenadmin, idmasteragen , tipeagen_admin, usernameagen_admin, passwordagen_admin, lastloginagen_admin,   
+						nameagen_admin, phone1agen_admin, phone2agen_admin , statusagenadmin, 
+						createagenadmin, createdateagenadmin    
 					) values (
 						$1, $2, $3, $4, $5, $6,   
 						$7, $8, $9, $10,     
@@ -589,9 +589,9 @@ func Save_masteragenadmin(admin, idrecord, idmasteragen, tipe, username, passwor
 			sql_update := `
 				UPDATE 
 				` + tbl_mst_admin + `  
-				SET tipe_admin=$1, name_admin=$2, phone1_admin=$3, phone2_admin=$4, statusadmin=$5,  
-				updateadmin=$6, updatedateadmin=$7        
-				WHERE idmasteragen=$8 AND idadmin=$9        
+				SET tipeagen_admin=$1, nameagen_admin=$2, phone1agen_admin=$3, phone2agen_admin=$4, statusagenadmin=$5,  
+				updateagenadmin=$6, updatedateagenadmin=$7        
+				WHERE idmasteragen=$8 AND idagenadmin=$9        
 			`
 
 			flag_update, msg_update := Exec_SQL(sql_update, tbl_mst_admin, "UPDATE",
@@ -608,9 +608,9 @@ func Save_masteragenadmin(admin, idrecord, idmasteragen, tipe, username, passwor
 			sql_update := `
 				UPDATE 
 				` + tbl_mst_admin + `  
-				SET tipe_admin=$1, password_admin=$2, name_admin=$3, phone1_admin=$4, phone2_admin=$5, statusadmin=$6,  
-				updateadmin=$7, updatedateadmin=$8         
-				WHERE idmasteragen=$8 AND idadmin=$9        
+				SET tipeagen_admin=$1, passwordagen_admin=$2, nameagen_admin=$3, phone1agen_admin=$4, phone2agen_admin=$5, statusagenadmin=$6,  
+				updateagenadmin=$7, updatedateagenadmin=$8         
+				WHERE idmasteragen=$8 AND idagenadmin=$9        
 			`
 
 			flag_update, msg_update := Exec_SQL(sql_update, tbl_mst_admin, "UPDATE",
