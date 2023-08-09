@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -17,7 +18,6 @@ import (
 const database_master_local = configs.DB_tbl_mst_master
 const database_masteradmin_local = configs.DB_tbl_mst_master_admin
 const database_masteragen_local = configs.DB_tbl_mst_master_agen
-const database_masteragenadmin_local = configs.DB_tbl_mst_master_agen_admin
 
 func Fetch_masterHome() (helpers.Responsemaster, error) {
 	var obj entities.Model_master
@@ -263,50 +263,56 @@ func Fetch_masteragenAdmin(idmasteragen string) (helpers.Response, error) {
 	ctx := context.Background()
 	start := time.Now()
 
+	tbl_mst_admin := Get_mappingdatabase_admin(idmasteragen)
 	sql_select := `SELECT 
-			idmasteragenadmin, tipe_masteragenadmin, username_masteragenadmin,   
-			name_masteragenadmin , phone1_masteragenadmin, phone2_masteragenadmin, statusmasteragenadmin, 
-			createmasteragenadmin, to_char(COALESCE(createdatemasteragenadmin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
-			updatemasteragenadmin, to_char(COALESCE(updatedatemasteragenadmin,now()), 'YYYY-MM-DD HH24:MI:SS') 
-			FROM ` + database_masteragenadmin_local + `  
+			idadmin, tipe_admin, username_admin,     
+			name_admin , phone1_admin, phone2_admin, statusadmin, 
+			to_char(COALESCE(lastlogin_admin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
+			createadmin, to_char(COALESCE(createdateadmin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
+			updateadmin, to_char(COALESCE(updatedateadmin,now()), 'YYYY-MM-DD HH24:MI:SS') 
+			FROM ` + tbl_mst_admin + `  
 			WHERE idmasteragen= '` + idmasteragen + `'   
-			ORDER BY createdatemasteragenadmin DESC   `
-
+			ORDER BY lastlogin_admin DESC   `
+	log.Println(sql_select)
 	row, err := con.QueryContext(ctx, sql_select)
 	helpers.ErrorCheck(err)
 	for row.Next() {
 		var (
-			idmasteragenadmin_db                                                                                           int
-			tipe_masteragenadmin_db, username_masteragenadmin_db                                                           string
-			name_masteragenadmin_db, phone1_masteragenadmin_db, phone2_masteragenadmin_db, statusmasteragenadmin_db        string
-			createmasteragenadmin_db, createdatemasteragenadmin_db, updatemasteragenadmin_db, updatedatemasteragenadmin_db string
+			idadmin_db, tipe_admin_db, username_admin_db                                        string
+			name_admin_db, phone1_admin_db, phone2_admin_db, statusadmin_db, lastlogin_admin_db string
+			createadmin_db, createdateadmin_db, updateadmin_db, updatedateadmin_db              string
 		)
 
-		err = row.Scan(&idmasteragenadmin_db, &tipe_masteragenadmin_db, &username_masteragenadmin_db,
-			&name_masteragenadmin_db, &phone1_masteragenadmin_db, &phone2_masteragenadmin_db, &statusmasteragenadmin_db,
-			&createmasteragenadmin_db, &createdatemasteragenadmin_db, &updatemasteragenadmin_db, &updatedatemasteragenadmin_db)
+		err = row.Scan(&idadmin_db, &tipe_admin_db, &username_admin_db,
+			&name_admin_db, &phone1_admin_db, &phone2_admin_db, &statusadmin_db, &lastlogin_admin_db,
+			&createadmin_db, &createdateadmin_db, &updateadmin_db, &updatedateadmin_db)
 
 		helpers.ErrorCheck(err)
 		create := ""
 		update := ""
 		status_css := configs.STATUS_CANCEL
-		if createmasteragenadmin_db != "" {
-			create = createmasteragenadmin_db + ", " + createdatemasteragenadmin_db
+		lastlogin := ""
+		if createadmin_db != "" {
+			create = createadmin_db + ", " + createdateadmin_db
 		}
-		if updatemasteragenadmin_db != "" {
-			update = updatemasteragenadmin_db + ", " + updatedatemasteragenadmin_db
+		if updateadmin_db != "" {
+			update = updateadmin_db + ", " + updatedateadmin_db
 		}
-		if statusmasteragenadmin_db == "Y" {
+		if statusadmin_db == "Y" {
 			status_css = configs.STATUS_COMPLETE
 		}
+		if lastlogin_admin_db != createdateadmin_db {
+			lastlogin = lastlogin_admin_db
+		}
 
-		obj.Masteragenadmin_id = idmasteragenadmin_db
-		obj.Masteragenadmin_tipe = tipe_masteragenadmin_db
-		obj.Masteragenadmin_username = username_masteragenadmin_db
-		obj.Masteragenadmin_name = name_masteragenadmin_db
-		obj.Masteragenadmin_phone1 = phone1_masteragenadmin_db
-		obj.Masteragenadmin_phone2 = phone2_masteragenadmin_db
-		obj.Masteragenadmin_status = statusmasteragenadmin_db
+		obj.Masteragenadmin_id = idadmin_db
+		obj.Masteragenadmin_tipe = tipe_admin_db
+		obj.Masteragenadmin_username = username_admin_db
+		obj.Masteragenadmin_lastlogin = lastlogin
+		obj.Masteragenadmin_name = name_admin_db
+		obj.Masteragenadmin_phone1 = phone1_admin_db
+		obj.Masteragenadmin_phone2 = phone2_admin_db
+		obj.Masteragenadmin_status = statusadmin_db
 		obj.Masteragenadmin_status_css = status_css
 		obj.Masteragenadmin_create = create
 		obj.Masteragenadmin_update = update
@@ -539,34 +545,36 @@ func Save_masteragen(admin, idrecord, idmaster, idcurr, name, owner, phone1, pho
 
 	return res, nil
 }
-func Save_masteragenadmin(admin, idmasteragen, tipe, username, password, name, phone1, phone2, status, sData string, idrecord int) (helpers.Response, error) {
+func Save_masteragenadmin(admin, idrecord, idmasteragen, tipe, username, password, name, phone1, phone2, status, sData string) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
 	tglnow, _ := goment.New()
 	render_page := time.Now()
 	flag := false
+	tbl_mst_admin := Get_mappingdatabase_admin(idmasteragen)
 	if sData == "New" {
-		flag = CheckDB(database_masteradmin_local, "username_masteradmin", username)
+		flag = CheckDB(tbl_mst_admin, "username_admin", username)
 		if !flag {
 			sql_insert := `
 					insert into
-					` + database_masteragenadmin_local + ` (
-						idmasteragenadmin, idmasteragen , tipe_masteragenadmin, username_masteragenadmin, password_masteragenadmin,  
-						name_masteragenadmin, phone1_masteragenadmin, phone2_masteragenadmin , statusmasteragenadmin, 
-						createmasteragenadmin, createdatemasteragenadmin    
+					` + tbl_mst_admin + ` (
+						idadmin, idmasteragen , tipe_admin, username_admin, password_admin, lastlogin_admin,   
+						name_admin, phone1_admin, phone2_admin , statusadmin, 
+						createadmin, createdateadmin    
 					) values (
-						$1, $2, $3, $4, $5,   
-						$6, $7, $8, $9,     
-						$10, $11 
+						$1, $2, $3, $4, $5, $6,   
+						$7, $8, $9, $10,     
+						$11, $12  
 					)
 				`
-			field_column := database_masteragenadmin_local + tglnow.Format("YY")
+			field_column := idmasteragen + tbl_mst_admin + tglnow.Format("YY")
 			idrecord_counter := Get_counter(field_column)
 			hashpass := helpers.HashPasswordMD5(password)
-			flag_insert, msg_insert := Exec_SQL(sql_insert, database_masteragenadmin_local, "INSERT",
-				tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idmasteragen, tipe, username, hashpass,
+			create_date := tglnow.Format("YYYY-MM-DD HH:mm:ss")
+			flag_insert, msg_insert := Exec_SQL(sql_insert, tbl_mst_admin, "INSERT",
+				idmasteragen+"-"+tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idmasteragen, tipe, username, hashpass, create_date,
 				name, phone1, phone2, status,
-				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
+				admin, create_date)
 
 			if flag_insert {
 				msg = "Succes"
@@ -580,13 +588,13 @@ func Save_masteragenadmin(admin, idmasteragen, tipe, username, password, name, p
 		if password == "" {
 			sql_update := `
 				UPDATE 
-				` + database_masteragenadmin_local + `  
-				SET tipe_masteragenadmin=$1, name_masteragenadmin=$2, phone1_masteragenadmin=$3, phone2_masteragenadmin=$4, statusmasteragenadmin=$5,  
-				updatemasteragenadmin=$6, updatedatemasteragenadmin=$7        
-				WHERE idmasteragen=$8 AND idmasteragenadmin=$9        
+				` + tbl_mst_admin + `  
+				SET tipe_admin=$1, name_admin=$2, phone1_admin=$3, phone2_admin=$4, statusadmin=$5,  
+				updateadmin=$6, updatedateadmin=$7        
+				WHERE idmasteragen=$8 AND idadmin=$9        
 			`
 
-			flag_update, msg_update := Exec_SQL(sql_update, database_masteragenadmin_local, "UPDATE",
+			flag_update, msg_update := Exec_SQL(sql_update, tbl_mst_admin, "UPDATE",
 				tipe, name, phone1, phone2, status,
 				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idmasteragen, idrecord)
 
@@ -599,13 +607,13 @@ func Save_masteragenadmin(admin, idmasteragen, tipe, username, password, name, p
 			hashpass := helpers.HashPasswordMD5(password)
 			sql_update := `
 				UPDATE 
-				` + database_masteragenadmin_local + `  
-				SET tipe_masteragenadmin=$1, password_masteradmin=$2, name_masteragenadmin=$3, phone1_masteragenadmin=$4, phone2_masteragenadmin=$5, statusmasteragenadmin=$6,  
-				updatemasteragenadmin=$7, updatedatemasteragenadmin=$8         
-				WHERE idmasteragen=$8 AND idmasteragenadmin=$9        
+				` + tbl_mst_admin + `  
+				SET tipe_admin=$1, password_admin=$2, name_admin=$3, phone1_admin=$4, phone2_admin=$5, statusadmin=$6,  
+				updateadmin=$7, updatedateadmin=$8         
+				WHERE idmasteragen=$8 AND idadmin=$9        
 			`
 
-			flag_update, msg_update := Exec_SQL(sql_update, database_masteragenadmin_local, "UPDATE",
+			flag_update, msg_update := Exec_SQL(sql_update, tbl_mst_admin, "UPDATE",
 				tipe, hashpass, name, phone1, phone2, status,
 				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idmasteragen, idrecord)
 

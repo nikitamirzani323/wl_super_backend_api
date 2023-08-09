@@ -203,20 +203,21 @@ func Masteragenadmin(c *fiber.Ctx) error {
 			"record":  errors,
 		})
 	}
-	fmt.Println(client.Masteragen_idmaster)
+	fmt.Println(client.Masteragen_idagen)
 
 	var obj entities.Model_masteragenadmin
 	var arraobj []entities.Model_masteragenadmin
 	render_page := time.Now()
-	resultredis, flag := helpers.GetRedis(Fieldmasteragenadmin_home_redis + "_" + client.Masteragen_idmaster)
+	resultredis, flag := helpers.GetRedis(Fieldmasteragenadmin_home_redis + "_" + client.Masteragen_idagen)
 	jsonredis := []byte(resultredis)
 	message_RD, _ := jsonparser.GetString(jsonredis, "message")
 	perpage_RD, _ := jsonparser.GetInt(jsonredis, "perpage")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-		masteragenadmin_id, _ := jsonparser.GetInt(value, "masteragenadmin_id")
+		masteragenadmin_id, _ := jsonparser.GetString(value, "masteragenadmin_id")
 		masteragenadmin_tipe, _ := jsonparser.GetString(value, "masteragenadmin_tipe")
 		masteragenadmin_username, _ := jsonparser.GetString(value, "masteragenadmin_username")
+		masteragenadmin_lastlogin, _ := jsonparser.GetString(value, "masteragenadmin_lastlogin")
 		masteragenadmin_name, _ := jsonparser.GetString(value, "masteragenadmin_name")
 		masteragenadmin_phone1, _ := jsonparser.GetString(value, "masteragenadmin_phone1")
 		masteragenadmin_phone2, _ := jsonparser.GetString(value, "masteragenadmin_phone2")
@@ -225,10 +226,11 @@ func Masteragenadmin(c *fiber.Ctx) error {
 		masteragenadmin_create, _ := jsonparser.GetString(value, "masteragenadmin_create")
 		masteragenadmin_update, _ := jsonparser.GetString(value, "masteragenadmin_update")
 
-		obj.Masteragenadmin_id = int(masteragenadmin_id)
+		obj.Masteragenadmin_id = masteragenadmin_id
 		obj.Masteragenadmin_tipe = masteragenadmin_tipe
 		obj.Masteragenadmin_name = masteragenadmin_name
 		obj.Masteragenadmin_username = masteragenadmin_username
+		obj.Masteragenadmin_lastlogin = masteragenadmin_lastlogin
 		obj.Masteragenadmin_phone1 = masteragenadmin_phone1
 		obj.Masteragenadmin_phone2 = masteragenadmin_phone2
 		obj.Masteragenadmin_status = masteragenadmin_status
@@ -238,7 +240,7 @@ func Masteragenadmin(c *fiber.Ctx) error {
 		arraobj = append(arraobj, obj)
 	})
 	if !flag {
-		result, err := models.Fetch_masteragenAdmin(client.Masteragen_idmaster)
+		result, err := models.Fetch_masteragenAdmin(client.Masteragen_idagen)
 		if err != nil {
 			c.Status(fiber.StatusBadRequest)
 			return c.JSON(fiber.Map{
@@ -247,7 +249,7 @@ func Masteragenadmin(c *fiber.Ctx) error {
 				"record":  nil,
 			})
 		}
-		helpers.SetRedis(Fieldmasteragenadmin_home_redis+"_"+client.Masteragen_idmaster, result, 60*time.Minute)
+		helpers.SetRedis(Fieldmasteragenadmin_home_redis+"_"+client.Masteragen_idagen, result, 60*time.Minute)
 		fmt.Println("MASTER AGEN ADMIN MYSQL")
 		return c.JSON(result)
 	} else {
@@ -453,13 +455,13 @@ func MasteragenadminSave(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
 
-	// admin, idmasteragen, tipe, username, password, name, phone1, phone2, status, sData string, idrecord intg
+	// admin, idrecord, idmasteragen, tipe, username, password, name, phone1, phone2, status, sData string
 	result, err := models.Save_masteragenadmin(
 		client_admin,
-		client.Masteragenadmin_idmasteragen, client.Masteragenadmin_tipe,
+		client.Masteragenadmin_id, client.Masteragenadmin_idmasteragen, client.Masteragenadmin_tipe,
 		client.Masteragenadmin_username, client.Masteragenadmin_password, client.Masteragenadmin_name, client.Masteragenadmin_phone1, client.Masteragenadmin_phone2,
 		client.Masteragenadmin_status,
-		client.Sdata, client.Masteragenadmin_id)
+		client.Sdata)
 	if err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
