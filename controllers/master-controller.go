@@ -217,6 +217,7 @@ func Masteragenadmin(c *fiber.Ctx) error {
 		masteragenadmin_id, _ := jsonparser.GetString(value, "masteragenadmin_id")
 		masteragenadmin_tipe, _ := jsonparser.GetString(value, "masteragenadmin_tipe")
 		masteragenadmin_username, _ := jsonparser.GetString(value, "masteragenadmin_username")
+		masteragenadmin_ipaddress, _ := jsonparser.GetString(value, "masteragenadmin_ipaddress")
 		masteragenadmin_lastlogin, _ := jsonparser.GetString(value, "masteragenadmin_lastlogin")
 		masteragenadmin_name, _ := jsonparser.GetString(value, "masteragenadmin_name")
 		masteragenadmin_phone1, _ := jsonparser.GetString(value, "masteragenadmin_phone1")
@@ -230,6 +231,7 @@ func Masteragenadmin(c *fiber.Ctx) error {
 		obj.Masteragenadmin_tipe = masteragenadmin_tipe
 		obj.Masteragenadmin_name = masteragenadmin_name
 		obj.Masteragenadmin_username = masteragenadmin_username
+		obj.Masteragenadmin_ipaddress = masteragenadmin_ipaddress
 		obj.Masteragenadmin_lastlogin = masteragenadmin_lastlogin
 		obj.Masteragenadmin_phone1 = masteragenadmin_phone1
 		obj.Masteragenadmin_phone2 = masteragenadmin_phone2

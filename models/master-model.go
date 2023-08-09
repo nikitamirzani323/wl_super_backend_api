@@ -265,7 +265,7 @@ func Fetch_masteragenAdmin(idmasteragen string) (helpers.Response, error) {
 
 	tbl_mst_admin := configs.DB_tbl_mst_master_agen_admin
 	sql_select := `SELECT 
-			idagenadmin, tipeagen_admin, usernameagen_admin,     
+			idagenadmin, tipeagen_admin, usernameagen_admin, ipaddress_admin,     
 			nameagen_admin , phone1agen_admin, phone2agen_admin, statusagenadmin, 
 			to_char(COALESCE(lastloginagen_admin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
 			createagenadmin, to_char(COALESCE(createdateagenadmin,now()), 'YYYY-MM-DD HH24:MI:SS'), 
@@ -278,12 +278,12 @@ func Fetch_masteragenAdmin(idmasteragen string) (helpers.Response, error) {
 	helpers.ErrorCheck(err)
 	for row.Next() {
 		var (
-			idadmin_db, tipe_admin_db, username_admin_db                                        string
+			idadmin_db, tipe_admin_db, username_admin_db, ipaddress_admin_db                    string
 			name_admin_db, phone1_admin_db, phone2_admin_db, statusadmin_db, lastlogin_admin_db string
 			createadmin_db, createdateadmin_db, updateadmin_db, updatedateadmin_db              string
 		)
 
-		err = row.Scan(&idadmin_db, &tipe_admin_db, &username_admin_db,
+		err = row.Scan(&idadmin_db, &tipe_admin_db, &username_admin_db, &ipaddress_admin_db,
 			&name_admin_db, &phone1_admin_db, &phone2_admin_db, &statusadmin_db, &lastlogin_admin_db,
 			&createadmin_db, &createdateadmin_db, &updateadmin_db, &updatedateadmin_db)
 
@@ -308,6 +308,7 @@ func Fetch_masteragenAdmin(idmasteragen string) (helpers.Response, error) {
 		obj.Masteragenadmin_id = idadmin_db
 		obj.Masteragenadmin_tipe = tipe_admin_db
 		obj.Masteragenadmin_username = username_admin_db
+		obj.Masteragenadmin_ipaddress = ipaddress_admin_db
 		obj.Masteragenadmin_lastlogin = lastlogin
 		obj.Masteragenadmin_name = name_admin_db
 		obj.Masteragenadmin_phone1 = phone1_admin_db

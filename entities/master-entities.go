@@ -56,6 +56,7 @@ type Model_masteragenadmin struct {
 	Masteragenadmin_id         string `json:"masteragenadmin_id"`
 	Masteragenadmin_tipe       string `json:"masteragenadmin_tipe"`
 	Masteragenadmin_username   string `json:"masteragenadmin_username"`
+	Masteragenadmin_ipaddress  string `json:"masteragenadmin_ipaddress"`
 	Masteragenadmin_lastlogin  string `json:"masteragenadmin_lastlogin"`
 	Masteragenadmin_name       string `json:"masteragenadmin_name"`
 	Masteragenadmin_phone1     string `json:"masteragenadmin_phone1"`
