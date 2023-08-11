@@ -64,11 +64,19 @@ func Agenadminrulehome(c *fiber.Ctx) error {
 	jsonredis := []byte(resultredis)
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-		agenadminrule_id, _ := jsonparser.GetString(value, "agenadminrule_id")
+		agenadminrule_id, _ := jsonparser.GetInt(value, "agenadminrule_id")
+		agenadminrule_nmagen, _ := jsonparser.GetString(value, "agenadminrule_nmagen")
+		agenadminrule_name, _ := jsonparser.GetString(value, "agenadminrule_name")
 		agenadminrule_rule, _ := jsonparser.GetString(value, "agenadminrule_rule")
+		agenadminrule_create, _ := jsonparser.GetString(value, "agenadminrule_create")
+		agenadminrule_update, _ := jsonparser.GetString(value, "agenadminrule_update")
 
-		obj.Agenadminrule_id = agenadminrule_id
+		obj.Agenadminrule_id = int(agenadminrule_id)
+		obj.Agenadminrule_nmagen = agenadminrule_nmagen
+		obj.Agenadminrule_name = agenadminrule_name
 		obj.Agenadminrule_rule = agenadminrule_rule
+		obj.Agenadminrule_create = agenadminrule_create
+		obj.Agenadminrule_update = agenadminrule_update
 		arraobj = append(arraobj, obj)
 	})
 
@@ -176,7 +184,9 @@ func AgenadminruleSave(c *fiber.Ctx) error {
 	temp_decp := helpers.Decryption(name)
 	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
 
-	result, err := models.Save_agenadminrule(client_admin, client.Agenadminrule_id, client.Agenadminrule_rule, client.Sdata)
+	//admin, idmasteragen, nmrule, rule, sData string, idrecord int
+	result, err := models.Save_agenadminrule(client_admin,
+		client.Agenadminrule_idagen, client.Agenadminrule_name, client.Agenadminrule_rule, client.Sdata, client.Agenadminrule_id)
 	if err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
