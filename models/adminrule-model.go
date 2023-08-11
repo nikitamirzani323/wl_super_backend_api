@@ -61,10 +61,12 @@ func Fetch_adminruleHome() (helpers.Response, error) {
 
 	return res, nil
 }
-func Fetch_agenadminruleHome() (helpers.Response, error) {
+func Fetch_agenadminruleHome() (helpers.Responseagenrule, error) {
 	var obj entities.Model_agenadminrule
 	var arraobj []entities.Model_agenadminrule
-	var res helpers.Response
+	var objagen entities.Model_masteragen_share
+	var arraobjagen []entities.Model_masteragen_share
+	var res helpers.Responseagenrule
 	msg := "Data Not Found"
 	con := db.CreateCon()
 	ctx := context.Background()
@@ -116,9 +118,33 @@ func Fetch_agenadminruleHome() (helpers.Response, error) {
 	}
 	defer row.Close()
 
+	sql_selectagen := `SELECT 
+			idmasteragen, nmagen  
+			FROM ` + configs.DB_tbl_mst_master_agen + ` 
+			ORDER BY nmagen ASC    
+	`
+	rowmasteragen, errmasteragen := con.QueryContext(ctx, sql_selectagen)
+	helpers.ErrorCheck(errmasteragen)
+	for rowmasteragen.Next() {
+		var (
+			idmasteragen_db, nmagen_db string
+		)
+
+		errmasteragen = rowmasteragen.Scan(&idmasteragen_db, &nmagen_db)
+
+		helpers.ErrorCheck(errmasteragen)
+
+		objagen.Masteragen_id = idmasteragen_db
+		objagen.Masteragen_nmagen = nmagen_db
+		arraobjagen = append(arraobjagen, objagen)
+		msg = "Success"
+	}
+	defer rowmasteragen.Close()
+
 	res.Status = fiber.StatusOK
 	res.Message = msg
 	res.Record = arraobj
+	res.Listagen = arraobjagen
 	res.Time = time.Since(start).String()
 
 	return res, nil

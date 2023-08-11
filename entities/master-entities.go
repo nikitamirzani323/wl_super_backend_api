@@ -52,6 +52,10 @@ type Model_masteragen struct {
 	Masteragen_create     string `json:"masteragen_create"`
 	Masteragen_update     string `json:"masteragen_update"`
 }
+type Model_masteragen_share struct {
+	Masteragen_id     string `json:"masteragen_id"`
+	Masteragen_nmagen string `json:"masteragen_nmagen"`
+}
 type Model_masteragenadmin struct {
 	Masteragenadmin_id         string `json:"masteragenadmin_id"`
 	Masteragenadmin_tipe       string `json:"masteragenadmin_tipe"`

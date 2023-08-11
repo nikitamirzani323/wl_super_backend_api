@@ -29,6 +29,13 @@ type Responseprovider struct {
 	Listprovider interface{} `json:"listprovider"`
 	Time         string      `json:"time"`
 }
+type Responseagenrule struct {
+	Status   int         `json:"status"`
+	Message  string      `json:"message"`
+	Record   interface{} `json:"record"`
+	Listagen interface{} `json:"listagen"`
+	Time     string      `json:"time"`
+}
 type ResponseAdmin struct {
 	Status   int         `json:"status"`
 	Message  string      `json:"message"`

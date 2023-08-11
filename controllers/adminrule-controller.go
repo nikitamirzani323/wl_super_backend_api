@@ -59,9 +59,12 @@ func Adminrulehome(c *fiber.Ctx) error {
 func Agenadminrulehome(c *fiber.Ctx) error {
 	var obj entities.Model_agenadminrule
 	var arraobj []entities.Model_agenadminrule
+	var objagen entities.Model_masteragen_share
+	var arraobjagen []entities.Model_masteragen_share
 	render_page := time.Now()
 	resultredis, flag := helpers.GetRedis(Fieldagenadminrule_home_redis)
 	jsonredis := []byte(resultredis)
+	listagen_RD, _, _, _ := jsonparser.Get(jsonredis, "listagen")
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		agenadminrule_id, _ := jsonparser.GetInt(value, "agenadminrule_id")
@@ -79,7 +82,14 @@ func Agenadminrulehome(c *fiber.Ctx) error {
 		obj.Agenadminrule_update = agenadminrule_update
 		arraobj = append(arraobj, obj)
 	})
+	jsonparser.ArrayEach(listagen_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		masteragen_id, _ := jsonparser.GetString(value, "masteragen_id")
+		masteragen_nmagen, _ := jsonparser.GetString(value, "masteragen_nmagen")
 
+		objagen.Masteragen_id = masteragen_id
+		objagen.Masteragen_nmagen = masteragen_nmagen
+		arraobjagen = append(arraobjagen, objagen)
+	})
 	if !flag {
 		result, err := models.Fetch_agenadminruleHome()
 		if err != nil {
@@ -96,10 +106,11 @@ func Agenadminrulehome(c *fiber.Ctx) error {
 	} else {
 		fmt.Println("AGEN ADMIN RULE CACHE")
 		return c.JSON(fiber.Map{
-			"status":  fiber.StatusOK,
-			"message": "Success",
-			"record":  arraobj,
-			"time":    time.Since(render_page).String(),
+			"status":   fiber.StatusOK,
+			"message":  "Success",
+			"record":   arraobj,
+			"listagen": arraobjagen,
+			"time":     time.Since(render_page).String(),
 		})
 	}
 }
