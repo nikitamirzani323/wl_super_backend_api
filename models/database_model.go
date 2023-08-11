@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/nikitamirzani323/wl_super_backend_api/configs"
 	"github.com/nikitamirzani323/wl_super_backend_api/db"
@@ -188,6 +189,9 @@ func Exec_SQL(sql, table, action string, args ...interface{}) (bool, string) {
 	ctx := context.Background()
 	flag := false
 	msg := ""
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	stmt_exec, e_exec := con.PrepareContext(ctx, sql)
 	helpers.ErrorCheck(e_exec)
 	defer stmt_exec.Close()

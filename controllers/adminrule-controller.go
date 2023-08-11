@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -14,6 +14,7 @@ import (
 )
 
 const Fieldadminrule_home_redis = "LISTADMINRULE_BACKEND_ISBPANEL"
+const Fieldagenadminrule_home_redis = "LISTAGENADMINRULE_BACKEND_ISBPANEL"
 
 func Adminrulehome(c *fiber.Ctx) error {
 
@@ -43,10 +44,49 @@ func Adminrulehome(c *fiber.Ctx) error {
 			})
 		}
 		helpers.SetRedis(Fieldadminrule_home_redis, result, 60*time.Minute)
-		log.Println("ADMIN RULE MYSQL")
+		fmt.Println("ADMIN RULE MYSQL")
 		return c.JSON(result)
 	} else {
-		log.Println("ADMIN RULE CACHE")
+		fmt.Println("ADMIN RULE CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": "Success",
+			"record":  arraobj,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Agenadminrulehome(c *fiber.Ctx) error {
+	var obj entities.Model_agenadminrule
+	var arraobj []entities.Model_agenadminrule
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldagenadminrule_home_redis)
+	jsonredis := []byte(resultredis)
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		agenadminrule_id, _ := jsonparser.GetString(value, "agenadminrule_id")
+		agenadminrule_rule, _ := jsonparser.GetString(value, "agenadminrule_rule")
+
+		obj.Agenadminrule_id = agenadminrule_id
+		obj.Agenadminrule_rule = agenadminrule_rule
+		arraobj = append(arraobj, obj)
+	})
+
+	if !flag {
+		result, err := models.Fetch_agenadminruleHome()
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldagenadminrule_home_redis, result, 60*time.Minute)
+		fmt.Println("AGEN ADMIN RULE MYSQL")
+		return c.JSON(result)
+	} else {
+		fmt.Println("AGEN ADMIN RULE CACHE")
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusOK,
 			"message": "Success",
@@ -102,8 +142,58 @@ func AdminruleSave(c *fiber.Ctx) error {
 	_deleteredis_adminrule()
 	return c.JSON(result)
 }
+func AgenadminruleSave(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_agenadminrulesave)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	user := c.Locals("jwt").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	name := claims["name"].(string)
+	temp_decp := helpers.Decryption(name)
+	client_admin, _ := helpers.Parsing_Decry(temp_decp, "==")
+
+	result, err := models.Save_agenadminrule(client_admin, client.Agenadminrule_id, client.Agenadminrule_rule, client.Sdata)
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	_deleteredis_adminrule()
+	return c.JSON(result)
+}
 func _deleteredis_adminrule() {
 	val_master := helpers.DeleteRedis(Fieldadminrule_home_redis)
-	log.Printf("Redis Delete BACKEND ADMIN RULE : %d", val_master)
+	fmt.Printf("Redis Delete BACKEND ADMIN RULE : %d", val_master)
+
+	val_master2 := helpers.DeleteRedis(Fieldagenadminrule_home_redis)
+	fmt.Printf("Redis Delete BACKEND AGEN ADMIN RULE : %d", val_master2)
 
 }
