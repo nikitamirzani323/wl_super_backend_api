@@ -73,7 +73,7 @@ func Fetch_agenadminruleHome() (helpers.Responseagenrule, error) {
 	start := time.Now()
 
 	sql_select := `SELECT 
-			A.idagenadminrule, B.nmagen, A.nmagenadminrule, A.ruleagenadminrule, 
+			A.idagenadminrule, B.idmasteragen, B.nmagen, A.nmagenadminrule, A.ruleagenadminrule, 
 			A.createagenadminrule, to_char(COALESCE(A.createagenadminruledate,now()), 'YYYY-MM-DD HH24:MI:SS'), 
 			A.updateagenadminrule, to_char(COALESCE(A.updatedateagenadminrule,now()), 'YYYY-MM-DD HH24:MI:SS') 
 			FROM ` + database_agenadminrule_local + ` as A  
@@ -89,11 +89,11 @@ func Fetch_agenadminruleHome() (helpers.Responseagenrule, error) {
 		no += 1
 		var (
 			idagenadminrule_db                                                                                     int
-			nmagen_db, nmagenadminrule_db, ruleagenadminrule_db                                                    string
+			idmasteragen_db, nmagen_db, nmagenadminrule_db, ruleagenadminrule_db                                   string
 			createagenadminrule_db, createagenadminruledate_db, updateagenadminrule_db, updatedateagenadminrule_db string
 		)
 
-		err = row.Scan(&idagenadminrule_db, &nmagen_db, &nmagenadminrule_db, &ruleagenadminrule_db,
+		err = row.Scan(&idagenadminrule_db, &idmasteragen_db, &nmagen_db, &nmagenadminrule_db, &ruleagenadminrule_db,
 			&createagenadminrule_db, &createagenadminruledate_db, &updateagenadminrule_db, &updatedateagenadminrule_db)
 
 		helpers.ErrorCheck(err)
@@ -108,6 +108,7 @@ func Fetch_agenadminruleHome() (helpers.Responseagenrule, error) {
 		}
 
 		obj.Agenadminrule_id = idagenadminrule_db
+		obj.Agenadminrule_idagen = idmasteragen_db
 		obj.Agenadminrule_nmagen = nmagen_db
 		obj.Agenadminrule_name = nmagenadminrule_db
 		obj.Agenadminrule_rule = ruleagenadminrule_db

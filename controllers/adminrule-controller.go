@@ -68,6 +68,7 @@ func Agenadminrulehome(c *fiber.Ctx) error {
 	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		agenadminrule_id, _ := jsonparser.GetInt(value, "agenadminrule_id")
+		agenadminrule_idagen, _ := jsonparser.GetString(value, "agenadminrule_idagen")
 		agenadminrule_nmagen, _ := jsonparser.GetString(value, "agenadminrule_nmagen")
 		agenadminrule_name, _ := jsonparser.GetString(value, "agenadminrule_name")
 		agenadminrule_rule, _ := jsonparser.GetString(value, "agenadminrule_rule")
@@ -75,6 +76,7 @@ func Agenadminrulehome(c *fiber.Ctx) error {
 		agenadminrule_update, _ := jsonparser.GetString(value, "agenadminrule_update")
 
 		obj.Agenadminrule_id = int(agenadminrule_id)
+		obj.Agenadminrule_idagen = agenadminrule_idagen
 		obj.Agenadminrule_nmagen = agenadminrule_nmagen
 		obj.Agenadminrule_name = agenadminrule_name
 		obj.Agenadminrule_rule = agenadminrule_rule

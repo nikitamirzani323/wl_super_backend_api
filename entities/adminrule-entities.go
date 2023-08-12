@@ -6,6 +6,7 @@ type Model_adminruleall struct {
 }
 type Model_agenadminrule struct {
 	Agenadminrule_id     int    `json:"agenadminrule_id"`
+	Agenadminrule_idagen string `json:"agenadminrule_idagen"`
 	Agenadminrule_nmagen string `json:"agenadminrule_nmagen"`
 	Agenadminrule_name   string `json:"agenadminrule_name"`
 	Agenadminrule_rule   string `json:"agenadminrule_rule"`
