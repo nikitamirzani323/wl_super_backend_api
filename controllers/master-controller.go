@@ -460,7 +460,7 @@ func MasteragenadminSave(c *fiber.Ctx) error {
 	// admin, idrecord, idmasteragen, tipe, username, password, name, phone1, phone2, status, sData string
 	result, err := models.Save_masteragenadmin(
 		client_admin,
-		client.Masteragenadmin_id, client.Masteragenadmin_idmasteragen, client.Masteragenadmin_tipe,
+		client.Masteragenadmin_id, client.Masteragenadmin_idmasteragen,
 		client.Masteragenadmin_username, client.Masteragenadmin_password, client.Masteragenadmin_name, client.Masteragenadmin_phone1, client.Masteragenadmin_phone2,
 		client.Masteragenadmin_status,
 		client.Sdata)

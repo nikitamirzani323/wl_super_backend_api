@@ -546,7 +546,7 @@ func Save_masteragen(admin, idrecord, idmaster, idcurr, name, owner, phone1, pho
 
 	return res, nil
 }
-func Save_masteragenadmin(admin, idrecord, idmasteragen, tipe, username, password, name, phone1, phone2, status, sData string) (helpers.Response, error) {
+func Save_masteragenadmin(admin, idrecord, idmasteragen, username, password, name, phone1, phone2, status, sData string) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
 	tglnow, _ := goment.New()
@@ -573,7 +573,7 @@ func Save_masteragenadmin(admin, idrecord, idmasteragen, tipe, username, passwor
 			hashpass := helpers.HashPasswordMD5(password)
 			create_date := tglnow.Format("YYYY-MM-DD HH:mm:ss")
 			flag_insert, msg_insert := Exec_SQL(sql_insert, tbl_mst_admin, "INSERT",
-				idmasteragen+"-"+tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idmasteragen, tipe, username, hashpass, create_date,
+				idmasteragen+"-"+tglnow.Format("YY")+strconv.Itoa(idrecord_counter), idmasteragen, "MASTER", username, hashpass, create_date,
 				name, phone1, phone2, status,
 				admin, create_date)
 
@@ -590,13 +590,13 @@ func Save_masteragenadmin(admin, idrecord, idmasteragen, tipe, username, passwor
 			sql_update := `
 				UPDATE 
 				` + tbl_mst_admin + `  
-				SET tipeagen_admin=$1, nameagen_admin=$2, phone1agen_admin=$3, phone2agen_admin=$4, statusagenadmin=$5,  
-				updateagenadmin=$6, updatedateagenadmin=$7        
-				WHERE idmasteragen=$8 AND idagenadmin=$9        
+				SET nameagen_admin=$1, phone1agen_admin=$2, phone2agen_admin=$3, statusagenadmin=$4,  
+				updateagenadmin=$5, updatedateagenadmin=$6         
+				WHERE idmasteragen=$7 AND idagenadmin=$8         
 			`
 
 			flag_update, msg_update := Exec_SQL(sql_update, tbl_mst_admin, "UPDATE",
-				tipe, name, phone1, phone2, status,
+				name, phone1, phone2, status,
 				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idmasteragen, idrecord)
 
 			if flag_update {
@@ -609,13 +609,13 @@ func Save_masteragenadmin(admin, idrecord, idmasteragen, tipe, username, passwor
 			sql_update := `
 				UPDATE 
 				` + tbl_mst_admin + `  
-				SET tipeagen_admin=$1, passwordagen_admin=$2, nameagen_admin=$3, phone1agen_admin=$4, phone2agen_admin=$5, statusagenadmin=$6,  
-				updateagenadmin=$7, updatedateagenadmin=$8         
+				SET passwordagen_admin=$1, nameagen_admin=$2, phone1agen_admin=$3, phone2agen_admin=$4, statusagenadmin=$5,  
+				updateagenadmin=$6, updatedateagenadmin=$7          
 				WHERE idmasteragen=$8 AND idagenadmin=$9        
 			`
 
 			flag_update, msg_update := Exec_SQL(sql_update, tbl_mst_admin, "UPDATE",
-				tipe, hashpass, name, phone1, phone2, status,
+				hashpass, name, phone1, phone2, status,
 				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idmasteragen, idrecord)
 
 			if flag_update {

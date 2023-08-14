@@ -124,7 +124,6 @@ type Controller_masteragenadminsave struct {
 	Sdata                        string `json:"sdata" validate:"required"`
 	Masteragenadmin_id           string `json:"masteragenadmin_id"`
 	Masteragenadmin_idmasteragen string `json:"masteragenadmin_idmasteragen" validate:"required"`
-	Masteragenadmin_tipe         string `json:"masteragenadmin_tipe" validate:"required"`
 	Masteragenadmin_username     string `json:"masteragenadmin_username" validate:"required"`
 	Masteragenadmin_password     string `json:"masteragenadmin_password"`
 	Masteragenadmin_name         string `json:"masteragenadmin_name" validate:"required"`
