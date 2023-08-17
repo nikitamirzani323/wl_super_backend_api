@@ -26,11 +26,13 @@ func Currhome(c *fiber.Ctx) error {
 	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		curr_id, _ := jsonparser.GetString(value, "curr_id")
 		curr_name, _ := jsonparser.GetString(value, "curr_name")
+		curr_multiplier, _ := jsonparser.GetFloat(value, "curr_multiplier")
 		curr_create, _ := jsonparser.GetString(value, "curr_create")
 		curr_update, _ := jsonparser.GetString(value, "curr_update")
 
 		obj.Curr_id = curr_id
 		obj.Curr_name = curr_name
+		obj.Curr_multiplier = float32(curr_multiplier)
 		obj.Curr_create = curr_create
 		obj.Curr_update = curr_update
 		arraobj = append(arraobj, obj)
@@ -96,7 +98,7 @@ func CurrSave(c *fiber.Ctx) error {
 	// admin, idrecord, name, sData string
 	result, err := models.Save_curr(
 		client_admin,
-		client.Curr_id, client.Curr_name, client.Sdata)
+		client.Curr_id, client.Curr_name, client.Sdata, client.Curr_multiplier)
 	if err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{

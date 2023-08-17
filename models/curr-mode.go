@@ -25,7 +25,7 @@ func Fetch_currHome() (helpers.Response, error) {
 	start := time.Now()
 
 	sql_select := `SELECT 
-			idcurr , nmcurr,  
+			idcurr , nmcurr, multipliercurr,   
 			createcurr, to_char(COALESCE(createdatecurr,now()), 'YYYY-MM-DD HH24:MI:SS'), 
 			updatecurr, to_char(COALESCE(updatedatecurr,now()), 'YYYY-MM-DD HH24:MI:SS') 
 			FROM ` + database_curr_local + `  
@@ -35,11 +35,12 @@ func Fetch_currHome() (helpers.Response, error) {
 	helpers.ErrorCheck(err)
 	for row.Next() {
 		var (
+			multipliercurr_db                                                  float32
 			idcurr_db, nmcurr_db                                               string
 			createcurr_db, createdatecurr_db, updatecurr_db, updatedatecurr_db string
 		)
 
-		err = row.Scan(&idcurr_db, &nmcurr_db,
+		err = row.Scan(&idcurr_db, &nmcurr_db, &multipliercurr_db,
 			&createcurr_db, &createdatecurr_db, &updatecurr_db, &updatedatecurr_db)
 
 		helpers.ErrorCheck(err)
@@ -54,6 +55,7 @@ func Fetch_currHome() (helpers.Response, error) {
 
 		obj.Curr_id = idcurr_db
 		obj.Curr_name = nmcurr_db
+		obj.Curr_multiplier = multipliercurr_db
 		obj.Curr_create = create
 		obj.Curr_update = update
 		arraobj = append(arraobj, obj)
@@ -68,7 +70,7 @@ func Fetch_currHome() (helpers.Response, error) {
 
 	return res, nil
 }
-func Save_curr(admin, idrecord, name, sData string) (helpers.Response, error) {
+func Save_curr(admin, idrecord, name, sData string, multiplier float32) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
 	tglnow, _ := goment.New()
@@ -81,15 +83,15 @@ func Save_curr(admin, idrecord, name, sData string) (helpers.Response, error) {
 			sql_insert := `
 				insert into
 				` + database_curr_local + ` (
-					idcurr , nmcurr, 
+					idcurr , nmcurr, multipliercurr,  
 					createcurr, createdatecurr 
 				) values (
-					$1, $2,  
-					$3, $4
+					$1, $2, $3,   
+					$4, $5 
 				)
 			`
 			flag_insert, msg_insert := Exec_SQL(sql_insert, database_curr_local, "INSERT",
-				idrecord, name,
+				idrecord, name, multiplier,
 				admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"))
 
 			if flag_insert {
@@ -104,13 +106,13 @@ func Save_curr(admin, idrecord, name, sData string) (helpers.Response, error) {
 		sql_update := `
 				UPDATE 
 				` + database_curr_local + `  
-				SET nmcurr=$1,  
-				updatecurr=$2, updatedatecurr=$3   
-				WHERE idcurr=$4  
+				SET nmcurr=$1, multipliercurr=$2,  
+				updatecurr=$3, updatedatecurr=$4    
+				WHERE idcurr=$5   
 			`
 
 		flag_update, msg_update := Exec_SQL(sql_update, database_curr_local, "UPDATE",
-			name,
+			name, multiplier,
 			admin, tglnow.Format("YYYY-MM-DD HH:mm:ss"), idrecord)
 
 		if flag_update {
