@@ -70,6 +70,21 @@ type Model_masteragenadmin struct {
 	Masteragenadmin_create     string `json:"masteragenadmin_create"`
 	Masteragenadmin_update     string `json:"masteragenadmin_update"`
 }
+type Model_masteragenmember struct {
+	Masteragenmember_id         string  `json:"masteragenmember_id"`
+	Masteragenmember_username   string  `json:"masteragenmember_username"`
+	Masteragenmember_name       string  `json:"masteragenmember_name"`
+	Masteragenmember_phone      string  `json:"masteragenmember_phone"`
+	Masteragenmember_email      string  `json:"masteragenmember_email"`
+	Masteragenmember_credit     float64 `json:"masteragenmember_credit"`
+	Masteragenmember_timezone   string  `json:"masteragenmember_timezone"`
+	Masteragenmember_ipaddress  string  `json:"masteragenmember_ipaddress"`
+	Masteragenmember_lastlogin  string  `json:"masteragenmember_lastlogin"`
+	Masteragenmember_status     string  `json:"masteragenmember_status"`
+	Masteragenmember_status_css string  `json:"masteragenmember_status_css"`
+	Masteragenmember_create     string  `json:"masteragenmember_create"`
+	Masteragenmember_update     string  `json:"masteragenmember_update"`
+}
 type Controller_mastersave struct {
 	Page              string `json:"page" validate:"required"`
 	Sdata             string `json:"sdata" validate:"required"`
@@ -119,6 +134,7 @@ type Controller_masteragensave struct {
 type Controller_masteragenadmin struct {
 	Masteragen_idagen string `json:"masteragen_idagen" validate:"required"`
 }
+
 type Controller_masteragenadminsave struct {
 	Page                         string `json:"page" validate:"required"`
 	Sdata                        string `json:"sdata" validate:"required"`

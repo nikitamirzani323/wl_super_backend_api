@@ -15,6 +15,7 @@ import (
 
 const Fieldmaster_home_redis = "LISTMASTER_BACKEND"
 const Fieldmasteragenadmin_home_redis = "LISTMASTERAGENADMIN_BACKEND"
+const Fieldmasteragenmember_home_redis = "LISTMASTERAGENMEMBER_BACKEND"
 const Fieldmaster_home_client_redis = "LISTMASTER_FRONTEND"
 
 func Masterhome(c *fiber.Ctx) error {
@@ -256,6 +257,98 @@ func Masteragenadmin(c *fiber.Ctx) error {
 		return c.JSON(result)
 	} else {
 		fmt.Println("MASTER AGEN ADMIN CACHE")
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": message_RD,
+			"record":  arraobj,
+			"perpage": perpage_RD,
+			"time":    time.Since(render_page).String(),
+		})
+	}
+}
+func Masteragenmember(c *fiber.Ctx) error {
+	var errors []*helpers.ErrorResponse
+	client := new(entities.Controller_masteragenadmin)
+	validate := validator.New()
+	if err := c.BodyParser(client); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": err.Error(),
+			"record":  nil,
+		})
+	}
+
+	err := validate.Struct(client)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element helpers.ErrorResponse
+			element.Field = err.StructField()
+			element.Tag = err.Tag()
+			errors = append(errors, &element)
+		}
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "validation",
+			"record":  errors,
+		})
+	}
+	fmt.Println(client.Masteragen_idagen)
+
+	var obj entities.Model_masteragenmember
+	var arraobj []entities.Model_masteragenmember
+	render_page := time.Now()
+	resultredis, flag := helpers.GetRedis(Fieldmasteragenmember_home_redis + "_" + client.Masteragen_idagen)
+	jsonredis := []byte(resultredis)
+	message_RD, _ := jsonparser.GetString(jsonredis, "message")
+	perpage_RD, _ := jsonparser.GetInt(jsonredis, "perpage")
+	record_RD, _, _, _ := jsonparser.Get(jsonredis, "record")
+	jsonparser.ArrayEach(record_RD, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		masteragenmember_id, _ := jsonparser.GetString(value, "masteragenmember_id")
+		masteragenmember_username, _ := jsonparser.GetString(value, "masteragenmember_username")
+		masteragenmember_name, _ := jsonparser.GetString(value, "masteragenmember_name")
+		Masteragenmember_phone, _ := jsonparser.GetString(value, "Masteragenmember_phone")
+		masteragenmember_email, _ := jsonparser.GetString(value, "masteragenmember_email")
+		masteragenmember_credit, _ := jsonparser.GetFloat(value, "masteragenmember_credit")
+		masteragenmember_timezone, _ := jsonparser.GetString(value, "masteragenmember_timezone")
+		masteragenmember_ipaddress, _ := jsonparser.GetString(value, "masteragenmember_ipaddress")
+		masteragenmember_lastlogin, _ := jsonparser.GetString(value, "masteragenmember_lastlogin")
+		masteragenmember_status, _ := jsonparser.GetString(value, "masteragenmember_status")
+		masteragenmember_status_css, _ := jsonparser.GetString(value, "masteragenmember_status_css")
+		masteragenmember_create, _ := jsonparser.GetString(value, "masteragenmember_create")
+		masteragenmember_update, _ := jsonparser.GetString(value, "masteragenmember_update")
+
+		obj.Masteragenmember_id = masteragenmember_id
+		obj.Masteragenmember_username = masteragenmember_username
+		obj.Masteragenmember_name = masteragenmember_name
+		obj.Masteragenmember_phone = Masteragenmember_phone
+		obj.Masteragenmember_email = masteragenmember_email
+		obj.Masteragenmember_credit = float64(masteragenmember_credit)
+		obj.Masteragenmember_timezone = masteragenmember_timezone
+		obj.Masteragenmember_ipaddress = masteragenmember_ipaddress
+		obj.Masteragenmember_lastlogin = masteragenmember_lastlogin
+		obj.Masteragenmember_status = masteragenmember_status
+		obj.Masteragenmember_status_css = masteragenmember_status_css
+		obj.Masteragenmember_create = masteragenmember_create
+		obj.Masteragenmember_update = masteragenmember_update
+		arraobj = append(arraobj, obj)
+	})
+	if !flag {
+		result, err := models.Fetch_memberByAgen(client.Masteragen_idagen)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest)
+			return c.JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": err.Error(),
+				"record":  nil,
+			})
+		}
+		helpers.SetRedis(Fieldmasteragenmember_home_redis+"_"+client.Masteragen_idagen, result, 5*time.Minute)
+		fmt.Println("MASTER AGEN MEMBER MYSQL")
+		return c.JSON(result)
+	} else {
+		fmt.Println("MASTER AGEN MEMBER CACHE")
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusOK,
 			"message": message_RD,

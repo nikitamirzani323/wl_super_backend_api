@@ -329,6 +329,80 @@ func Fetch_masteragenAdmin(idmasteragen string) (helpers.Response, error) {
 
 	return res, nil
 }
+func Fetch_memberByAgen(idagen string) (helpers.Response, error) {
+	var obj entities.Model_masteragenmember
+	var arraobj []entities.Model_masteragenmember
+	var res helpers.Response
+	msg := "Data Not Found"
+	con := db.CreateCon()
+	ctx := context.Background()
+	start := time.Now()
+
+	tbl_mst_member, _ := Get_mappingdatabase(idagen)
+
+	sql_select := `SELECT 
+			idmember , username_member, timezone_member,  
+			ipaddress_member , to_char(COALESCE(lastlogin_member,now()), 'YYYY-MM-DD HH24:MI:SS'), name_member,  
+			phone_member , email_member, (cashin_member-cashout_member) as credit , status_member,
+			create_member, to_char(COALESCE(createdate_member,now()), 'YYYY-MM-DD HH24:MI:SS'), 
+			update_member, to_char(COALESCE(updatedate_member,now()), 'YYYY-MM-DD HH24:MI:SS') 
+			FROM ` + tbl_mst_member + `  
+			WHERE idmasteragen=$1 
+			ORDER BY lastlogin_member DESC   `
+
+	row, err := con.QueryContext(ctx, sql_select, idagen)
+	helpers.ErrorCheck(err)
+	for row.Next() {
+		var (
+			idmember_db, username_member_db, timezone_member_db, ipaddress_member_db, lastlogin_member_db string
+			name_member_db, phone_member_db, email_member_db, status_member_db                            string
+			credit_db                                                                                     float64
+			create_member_db, createdate_member_db, update_member_db, updatedate_member_db                string
+		)
+
+		err = row.Scan(&idmember_db, &username_member_db, &timezone_member_db, &ipaddress_member_db, &lastlogin_member_db,
+			&name_member_db, &phone_member_db, &email_member_db, &credit_db, &status_member_db,
+			&create_member_db, &createdate_member_db, &update_member_db, &updatedate_member_db)
+
+		helpers.ErrorCheck(err)
+		create := ""
+		update := ""
+		status_css := configs.STATUS_CANCEL
+		if create_member_db != "" {
+			create = create_member_db + ", " + createdate_member_db
+		}
+		if update_member_db != "" {
+			update = update_member_db + ", " + updatedate_member_db
+		}
+		if status_member_db == "Y" {
+			status_css = configs.STATUS_COMPLETE
+		}
+
+		obj.Masteragenmember_id = idmember_db
+		obj.Masteragenmember_username = username_member_db
+		obj.Masteragenmember_name = name_member_db
+		obj.Masteragenmember_phone = phone_member_db
+		obj.Masteragenmember_email = email_member_db
+		obj.Masteragenmember_credit = credit_db
+		obj.Masteragenmember_timezone = timezone_member_db
+		obj.Masteragenmember_ipaddress = ipaddress_member_db
+		obj.Masteragenmember_lastlogin = lastlogin_member_db
+		obj.Masteragenmember_status = status_css
+		obj.Masteragenmember_status_css = status_member_db
+		obj.Masteragenmember_create = create
+		obj.Masteragenmember_update = update
+		arraobj = append(arraobj, obj)
+		msg = "Success"
+	}
+	defer row.Close()
+
+	res.Status = fiber.StatusOK
+	res.Message = msg
+	res.Record = arraobj
+	res.Time = time.Since(start).String()
+
+	return res, nil
+}
 func Save_master(admin, idrecord, idcurr, name, owner, phone1, phone2, email, note, status, idbanktype, norekbank, nmownerbank, sData string) (helpers.Response, error) {
 	var res helpers.Response
 	msg := "Failed"
